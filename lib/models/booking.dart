@@ -6,6 +6,10 @@ class Booking {
   final List<String> seats;
   final double totalPrice;
   final DateTime timestamp;
+  final String posterPath;
+  final String cinemaName;
+  final String format;
+  final DateTime time;
 
   Booking({
     required this.id,
@@ -15,6 +19,10 @@ class Booking {
     required this.seats,
     required this.totalPrice,
     required this.timestamp,
+    required this.posterPath,
+    required this.cinemaName,
+    required this.format,
+    required this.time,
   });
 
   factory Booking.fromMap(String id, Map<dynamic, dynamic> map) {
@@ -26,6 +34,10 @@ class Booking {
       seats: List<String>.from(map['seats'] ?? []),
       totalPrice: (map['totalPrice'] ?? 0).toDouble(),
       timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] ?? 0),
+      posterPath: map['posterPath'] ?? '',
+      cinemaName: map['cinemaName'] ?? '',
+      format: map['format'] ?? '2D',
+      time: DateTime.tryParse(map['time'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -37,6 +49,10 @@ class Booking {
       'seats': seats,
       'totalPrice': totalPrice,
       'timestamp': timestamp.millisecondsSinceEpoch,
+      'posterPath': posterPath,
+      'cinemaName': cinemaName,
+      'format': format,
+      'time': time.toIso8601String(),
     };
   }
 }

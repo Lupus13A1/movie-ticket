@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/tmdb_service.dart';
 import '../theme/app_theme.dart';
 import '../constants.dart';
+import 'showtime_screen.dart';
 
 class MovieDetailScreen extends StatefulWidget {
   final int movieId;
@@ -282,12 +283,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
             height: 64,
             child: ElevatedButton(
               onPressed: () {
-                // Navigate to Seat Booking Screen
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'PROCEED TO SEAT SELECTION',
-                      style: TextStyle(fontFamily: AppTheme.fontMono),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ShowtimeScreen(
+                      movieId: widget.movieId,
+                      movieTitle: title,
+                      posterPath: posterPath ?? '',
                     ),
                   ),
                 );

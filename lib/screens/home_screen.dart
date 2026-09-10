@@ -5,6 +5,8 @@ import '../services/tmdb_service.dart';
 import '../theme/app_theme.dart';
 import '../constants.dart';
 import 'movie_detail_screen.dart';
+import 'profile_screen.dart';
+import 'my_bookings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  int _bookingsRefreshKey = 0;
   List<Movie>? _nowPlaying;
   List<Movie>? _popular;
   List<Movie>? _upcoming;
@@ -439,24 +442,8 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _currentIndex,
         children: [
           _buildHomeContent(),
-          const Center(
-            child: Text(
-              'SEARCH',
-              style: TextStyle(fontFamily: AppTheme.fontDisplay, fontSize: 32),
-            ),
-          ),
-          const Center(
-            child: Text(
-              'MY BOOKINGS',
-              style: TextStyle(fontFamily: AppTheme.fontDisplay, fontSize: 32),
-            ),
-          ),
-          const Center(
-            child: Text(
-              'PROFILE',
-              style: TextStyle(fontFamily: AppTheme.fontDisplay, fontSize: 32),
-            ),
-          ),
+          MyBookingsScreen(key: ValueKey(_bookingsRefreshKey)),
+          const ProfileScreen(),
         ],
       ),
       bottomNavigationBar: Container(
@@ -465,7 +452,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+              if (index == 1) _bookingsRefreshKey++;
+            });
+          },
           backgroundColor: AppTheme.background,
           selectedItemColor: AppTheme.foreground,
           unselectedItemColor: AppTheme.mutedForeground,
@@ -496,17 +488,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Icon(Icons.home),
               ),
               label: 'HOME',
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.search_outlined),
-              ),
-              activeIcon: Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.search),
-              ),
-              label: 'SEARCH',
             ),
             BottomNavigationBarItem(
               icon: Padding(
