@@ -1,6 +1,8 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class Constants {
-  // TODO: Replace with your actual TMDB API Key
-  static const String tmdbApiKey = 'YOUR_TMDB_API_KEY_HERE';
+  static String get tmdbApiKey => dotenv.env['TMDB_API_KEY'] ?? '';
+  static String get tmdbAccessToken => dotenv.env['TMDB_ACCESS_TOKEN'] ?? '';
 
   static const String tmdbBaseUrl = 'https://api.themoviedb.org/3';
   static const String tmdbImageBaseUrl = 'https://image.tmdb.org/t/p/w500';

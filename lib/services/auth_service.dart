@@ -38,6 +38,8 @@ class AuthService extends ChangeNotifier {
     try {
       if (kIsWeb) {
         final googleProvider = GoogleAuthProvider();
+        // Force the account selection dialog to appear every time
+        googleProvider.setCustomParameters({'prompt': 'select_account'});
         await _auth.signInWithPopup(googleProvider);
       } else {
         throw Exception('Google Sign-In is only supported on web.');
