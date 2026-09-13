@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +14,7 @@ class BookingSummaryScreen extends StatefulWidget {
   final String posterPath;
   final List<String> selectedSeats;
   final double totalPrice;
+  final DateTime? holdExpiresAt;
 
   const BookingSummaryScreen({
     super.key,
@@ -21,6 +23,7 @@ class BookingSummaryScreen extends StatefulWidget {
     required this.posterPath,
     required this.selectedSeats,
     required this.totalPrice,
+    this.holdExpiresAt,
   });
 
   @override
@@ -29,8 +32,99 @@ class BookingSummaryScreen extends StatefulWidget {
 
 class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   bool _isProcessing = false;
+  Timer? _holdTimer;
+  int _remainingSeconds = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _startHoldCountdown();
+  }
+
+  @override
+  void dispose() {
+    _holdTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startHoldCountdown() {
+    if (widget.holdExpiresAt == null) return;
+
+    _remainingSeconds = widget.holdExpiresAt!
+        .difference(DateTime.now())
+        .inSeconds;
+    if (_remainingSeconds <= 0) {
+      _remainingSeconds = 0;
+      return;
+    }
+
+    _holdTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      final remaining = widget.holdExpiresAt!
+          .difference(DateTime.now())
+          .inSeconds;
+
+      if (remaining <= 0) {
+        timer.cancel();
+        _onHoldExpired();
+      } else {
+        setState(() {
+          _remainingSeconds = remaining;
+        });
+      }
+    });
+  }
+
+  void _onHoldExpired() {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'SEAT HOLD EXPIRED — PLEASE SELECT SEATS AGAIN',
+            style: TextStyle(fontFamily: AppTheme.fontMono),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      // Pop back to seat selection
+      Navigator.of(context).pop();
+    }
+  }
+
+  String _formatTimer(int seconds) {
+    final min = seconds ~/ 60;
+    final sec = seconds % 60;
+    return '${min.toString().padLeft(2, '0')}:${sec.toString().padLeft(2, '0')}';
+  }
 
   Future<void> _confirmBooking() async {
+    // Check if hold has expired before confirming
+    if (widget.holdExpiresAt != null &&
+        DateTime.now().isAfter(widget.holdExpiresAt!)) {
+      _onHoldExpired();
+      return;
+    }
+
+    // Check if showtime has passed
+    if (widget.showtime.isPast) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'THIS SHOWTIME HAS ALREADY PASSED',
+              style: TextStyle(fontFamily: AppTheme.fontMono),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
     setState(() => _isProcessing = true);
 
     try {
@@ -61,6 +155,8 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
               cinemaName: widget.showtime.cinemaName,
               time: widget.showtime.time,
               seats: widget.selectedSeats,
+              format: widget.showtime.format,
+              totalPrice: widget.totalPrice,
             ),
           ),
           (route) => route.isFirst, // Pop back to home as the root
@@ -133,6 +229,59 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // HOLD TIMER WARNING
+            if (_remainingSeconds > 0)
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                margin: const EdgeInsets.only(bottom: 24.0),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: _remainingSeconds <= 60 ? Colors.red : Colors.orange,
+                    width: 2,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.timer,
+                      color: _remainingSeconds <= 60
+                          ? Colors.red
+                          : Colors.orange,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'SEATS HELD FOR',
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontMono,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: _remainingSeconds <= 60
+                                  ? Colors.red
+                                  : Colors.orange,
+                            ),
+                          ),
+                          Text(
+                            _formatTimer(_remainingSeconds),
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontDisplay,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              color: _remainingSeconds <= 60
+                                  ? Colors.red
+                                  : Colors.orange,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
             // RECEIPT CARD
             Container(
               padding: const EdgeInsets.all(24.0),

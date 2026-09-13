@@ -1,3 +1,23 @@
+enum BookingStatus {
+  confirmed,
+  completed,
+  cancelled;
+
+  String toValue() => name;
+
+  static BookingStatus fromValue(String? value) {
+    switch (value) {
+      case 'completed':
+        return BookingStatus.completed;
+      case 'cancelled':
+        return BookingStatus.cancelled;
+      case 'confirmed':
+      default:
+        return BookingStatus.confirmed;
+    }
+  }
+}
+
 class Booking {
   final String id;
   final String userId;
@@ -10,6 +30,7 @@ class Booking {
   final String cinemaName;
   final String format;
   final DateTime time;
+  final BookingStatus status;
 
   Booking({
     required this.id,
@@ -23,7 +44,25 @@ class Booking {
     required this.cinemaName,
     required this.format,
     required this.time,
+    this.status = BookingStatus.confirmed,
   });
+
+  /// Whether this booking is for an upcoming showtime and still confirmed.
+  bool get isUpcoming =>
+      status == BookingStatus.confirmed && time.isAfter(DateTime.now());
+
+  /// Whether the showtime has passed (regardless of stored status).
+  bool get isPast => time.isBefore(DateTime.now());
+
+  /// Whether this booking was cancelled.
+  bool get isCancelled => status == BookingStatus.cancelled;
+
+  /// The effective status — auto-detects completed if showtime has passed.
+  BookingStatus get effectiveStatus {
+    if (status == BookingStatus.cancelled) return BookingStatus.cancelled;
+    if (time.isBefore(DateTime.now())) return BookingStatus.completed;
+    return BookingStatus.confirmed;
+  }
 
   factory Booking.fromMap(String id, Map<dynamic, dynamic> map) {
     return Booking(
@@ -38,6 +77,7 @@ class Booking {
       cinemaName: map['cinemaName'] ?? '',
       format: map['format'] ?? '2D',
       time: DateTime.tryParse(map['time'] ?? '') ?? DateTime.now(),
+      status: BookingStatus.fromValue(map['status']),
     );
   }
 
@@ -53,6 +93,7 @@ class Booking {
       'cinemaName': cinemaName,
       'format': format,
       'time': time.toIso8601String(),
+      'status': status.toValue(),
     };
   }
 }

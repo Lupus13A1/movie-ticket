@@ -55,7 +55,122 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
     }
   }
 
+  Future<void> _cancelBooking(Booking booking) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppTheme.background,
+          shape: const RoundedRectangleBorder(
+            side: BorderSide(color: AppTheme.foreground, width: 2),
+            borderRadius: BorderRadius.zero,
+          ),
+          title: const Text(
+            'CANCEL BOOKING',
+            style: TextStyle(
+              fontFamily: AppTheme.fontDisplay,
+              color: AppTheme.foreground,
+            ),
+          ),
+          content: const Text(
+            'ARE YOU SURE YOU WANT TO CANCEL THIS BOOKING?',
+            style: TextStyle(
+              fontFamily: AppTheme.fontMono,
+              color: AppTheme.foreground,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text(
+                'NO',
+                style: TextStyle(
+                  fontFamily: AppTheme.fontMono,
+                  color: AppTheme.foreground,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text(
+                'YES',
+                style: TextStyle(
+                  fontFamily: AppTheme.fontMono,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
+      try {
+        if (!mounted) return;
+        await context.read<FirebaseService>().cancelBooking(
+          bookingId: booking.id,
+          showtimeId: booking.showtimeId,
+          seats: booking.seats,
+        );
+        await _fetchBookings();
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'FAILED TO CANCEL BOOKING';
+          });
+        }
+      }
+    }
+  }
+
+  Widget _buildSectionHeader(String title, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Row(
+        children: [
+          Container(width: 16, height: 16, color: color),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              fontFamily: AppTheme.fontDisplay,
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: AppTheme.foreground,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildBookingCard(Booking booking) {
+    Color badgeColor;
+    Color badgeTextColor;
+    String badgeText;
+    bool isUpcoming = booking.effectiveStatus == BookingStatus.confirmed;
+
+    if (isUpcoming) {
+      badgeColor = Colors.green;
+      badgeTextColor = AppTheme.background;
+      badgeText = 'UPCOMING';
+    } else if (booking.effectiveStatus == BookingStatus.completed) {
+      badgeColor = AppTheme.muted;
+      badgeTextColor = AppTheme.mutedForeground;
+      badgeText = 'COMPLETED';
+    } else {
+      badgeColor = Colors.red;
+      badgeTextColor = AppTheme.background;
+      badgeText = 'CANCELLED';
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24.0),
       decoration: BoxDecoration(
@@ -140,19 +255,37 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                           horizontal: 8,
                           vertical: 4,
                         ),
-                        color: AppTheme.foreground,
-                        child: const Text(
-                          'CONFIRMED',
+                        color: badgeColor,
+                        child: Text(
+                          badgeText,
                           style: TextStyle(
                             fontFamily: AppTheme.fontMono,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: AppTheme.background,
+                            color: badgeTextColor,
                           ),
                         ),
                       ),
                     ],
                   ),
+                  if (isUpcoming) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () => _cancelBooking(booking),
+                        child: const Text(
+                          'CANCEL',
+                          style: TextStyle(
+                            fontFamily: AppTheme.fontMono,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -195,17 +328,42 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
       );
     }
 
+    final upcoming = _bookings!
+        .where((b) => b.effectiveStatus == BookingStatus.confirmed)
+        .toList();
+    final completed = _bookings!
+        .where((b) => b.effectiveStatus == BookingStatus.completed)
+        .toList();
+    final cancelled = _bookings!
+        .where((b) => b.effectiveStatus == BookingStatus.cancelled)
+        .toList();
+
+    upcoming.sort((a, b) => a.time.compareTo(b.time));
+    completed.sort((a, b) => b.time.compareTo(a.time));
+    cancelled.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    final listItems = <Widget>[];
+
+    if (upcoming.isNotEmpty) {
+      listItems.add(_buildSectionHeader('UPCOMING', Colors.green));
+      listItems.addAll(upcoming.map((b) => _buildBookingCard(b)));
+    }
+
+    if (completed.isNotEmpty) {
+      listItems.add(_buildSectionHeader('COMPLETED', AppTheme.muted));
+      listItems.addAll(completed.map((b) => _buildBookingCard(b)));
+    }
+
+    if (cancelled.isNotEmpty) {
+      listItems.add(_buildSectionHeader('CANCELLED', Colors.red));
+      listItems.addAll(cancelled.map((b) => _buildBookingCard(b)));
+    }
+
     return RefreshIndicator(
       onRefresh: _fetchBookings,
       color: AppTheme.background,
       backgroundColor: Colors.transparent,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(24.0),
-        itemCount: _bookings!.length,
-        itemBuilder: (context, index) {
-          return _buildBookingCard(_bookings![index]);
-        },
-      ),
+      child: ListView(padding: const EdgeInsets.all(24.0), children: listItems),
     );
   }
 }

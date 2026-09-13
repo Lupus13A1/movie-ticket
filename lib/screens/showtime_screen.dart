@@ -63,10 +63,22 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
   }
 
   List<Showtime> _getShowtimesForSelectedDate() {
+    final now = DateTime.now();
+    final isSelectedToday = _selectedDate.year == now.year &&
+        _selectedDate.month == now.month &&
+        _selectedDate.day == now.day;
+
     return _showtimes.where((st) {
-      return st.time.year == _selectedDate.year &&
+      final isSameDay = st.time.year == _selectedDate.year &&
           st.time.month == _selectedDate.month &&
           st.time.day == _selectedDate.day;
+
+      if (!isSameDay) return false;
+
+      if (isSelectedToday) {
+        if (st.time.isBefore(now)) return false;
+      }
+      return true;
     }).toList();
   }
 
@@ -92,6 +104,10 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
     final dates = _generateDates();
     final dailyShowtimes = _getShowtimesForSelectedDate();
     final groupedShowtimes = _groupShowtimesByCinema(dailyShowtimes);
+    final now = DateTime.now();
+    final isSelectedToday = _selectedDate.year == now.year &&
+        _selectedDate.month == now.month &&
+        _selectedDate.day == now.day;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -185,10 +201,12 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
                     ),
                   )
                 : groupedShowtimes.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
-                      'NO SHOWTIMES AVAILABLE',
-                      style: TextStyle(
+                      isSelectedToday
+                          ? 'ALL SHOWTIMES FOR TODAY HAVE PASSED'
+                          : 'NO SHOWTIMES AVAILABLE',
+                      style: const TextStyle(
                         fontFamily: AppTheme.fontMono,
                         color: AppTheme.foreground,
                       ),
@@ -230,20 +248,33 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
                               spacing: 12,
                               runSpacing: 12,
                               children: times.map((st) {
+                                final bool isPast = st.isPast;
+                                final bool isClosingSoon = st.isClosingSoon;
+                                final Color borderColor = isPast
+                                    ? AppTheme.muted
+                                    : (isClosingSoon
+                                        ? Colors.orange
+                                        : AppTheme.foreground);
+                                final Color textColor = isPast
+                                    ? AppTheme.muted
+                                    : AppTheme.foreground;
+
                                 return InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            SeatSelectionScreen(
-                                              showtime: st,
-                                              movieTitle: widget.movieTitle,
-                                              posterPath: widget.posterPath,
+                                  onTap: isPast
+                                      ? null
+                                      : () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SeatSelectionScreen(
+                                                    showtime: st,
+                                                    movieTitle: widget.movieTitle,
+                                                    posterPath: widget.posterPath,
+                                                  ),
                                             ),
-                                      ),
-                                    );
-                                  },
+                                          );
+                                        },
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 16,
@@ -251,7 +282,7 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       border: Border.all(
-                                        color: AppTheme.foreground,
+                                        color: borderColor,
                                         width: 2,
                                       ),
                                     ),
@@ -259,23 +290,37 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
                                       children: [
                                         Text(
                                           DateFormat('HH:mm').format(st.time),
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontFamily: AppTheme.fontMono,
                                             fontSize: 18,
                                             fontWeight: FontWeight.w700,
-                                            color: AppTheme.foreground,
+                                            color: textColor,
                                           ),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
                                           '${st.format} | ฿${st.price.toInt()}',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontFamily: AppTheme.fontMono,
                                             fontSize: 10,
                                             fontWeight: FontWeight.w500,
-                                            color: AppTheme.mutedForeground,
+                                            color: isPast
+                                                ? AppTheme.muted
+                                                : AppTheme.mutedForeground,
                                           ),
                                         ),
+                                        if (isClosingSoon && !isPast) ...[
+                                          const SizedBox(height: 4),
+                                          const Text(
+                                            'CLOSING SOON',
+                                            style: TextStyle(
+                                              fontFamily: AppTheme.fontMono,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w800,
+                                              color: Colors.orange,
+                                            ),
+                                          ),
+                                        ],
                                       ],
                                     ),
                                   ),
