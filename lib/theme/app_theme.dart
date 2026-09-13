@@ -1,252 +1,171 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Cyberpunk + Glassmorphism Design System
+/// Netflix-Inspired Cinematic Design System
 class AppTheme {
   AppTheme._();
 
   // ── Colors ──────────────────────────────────────────────────
-  static const Color background = Color(0xFF0A0A12); // Deep dark blue-black
-  static const Color foreground = Color(0xFFE0E0FF); // Off-white with cyan tint
-  static const Color primary = Color(0xFFFF00FF); // Neon Magenta
-  static const Color secondary = Color(0xFF00FFFF); // Neon Cyan
-  static const Color tertiary = Color(0xFFFFFF00); // Neon Yellow
+  static const Color background = Color(0xFF000000); // Deep Black
+  static const Color surface = Color(0xFF141414); // Dark Grey (Netflix surface)
+  static const Color primary = Color(0xFFE50914); // Netflix Red
+  static const Color primaryDark = Color(0xFFB81D24);
+  static const Color foreground = Color(0xFFFFFFFF); // White
+  static const Color mutedForeground = Color(0xFFB3B3B3); // Light Grey
+  static const Color borderColor = Color(0xFF333333); // Darker Grey for borders
+  static const Color error = Color(0xFFE50914);
 
-  static const Color muted = Color(
-    0x2200FFFF,
-  ); // Very sheer cyan for glass fills
-  static const Color mutedForeground = Color(0xFFA0A0C0);
-  static const Color borderColor = Color(
-    0x8800FFFF,
-  ); // Semi-transparent cyan border
-  static const Color borderLight = Color(0x4400FFFF);
-  static const Color error = Color(0xFFFF003C);
-
-  static const List<Color> primaryColors = [primary, secondary, tertiary];
-  static const Color primaryRed = primary; // Fallback
-  static const Color primaryBlue = secondary;
-  static const Color primaryYellow = tertiary;
-
-  static final Border border2 = Border.all(color: borderColor, width: 1);
-  static final Border border4 = Border.all(color: secondary, width: 2);
-  static const BoxShadow hardShadow = BoxShadow(
-    color: Colors.transparent,
-    offset: Offset.zero,
-  );
-  static const BoxShadow hardShadowLarge = BoxShadow(
-    color: Colors.transparent,
-    offset: Offset.zero,
-  );
-
-  static BoxDecoration cardDecoration({
-    Color color = muted,
-    bool largeShadow = false,
-    bool thickBorder = false,
-  }) {
-    return BoxDecoration(
-      color: color.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(16),
-      border: thickBorder ? border4 : border2,
-      boxShadow: [
-        BoxShadow(
-          color: color.withOpacity(0.2),
-          blurRadius: largeShadow ? 30 : 15,
-          spreadRadius: largeShadow ? 5 : 0,
-        ),
-      ],
-    );
-  }
+  static const Color primaryRed = primary;
+  static const Color primaryBlue = Color(0xFF2196F3); // Secondary if needed
+  static const Color primaryYellow = Color(0xFFFFC107); // For ratings
 
   // ── Typography ────────────────────────────────────────────────
-  static const String fontDisplay = 'Orbitron';
-  static const String fontBody = 'Rajdhani';
-  static const String fontMono = 'Share Tech Mono';
+  // Using Inter as a clean, modern sans-serif alternative to Netflix Sans
 
   // ── Theme Data ────────────────────────────────────────────────
   static ThemeData get theme {
-    final baseTextTheme = GoogleFonts.rajdhaniTextTheme();
+    final baseTextTheme = GoogleFonts.interTextTheme();
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor:
-          Colors.transparent, // Transparent so background gradient shows
+      scaffoldBackgroundColor: background,
       colorScheme: const ColorScheme.dark(
-        primary: secondary, // Use cyan as main primary for inputs etc
-        onPrimary: background,
-        secondary: primary,
-        onSecondary: background,
-        surface: Colors.transparent,
+        primary: primary,
+        onPrimary: foreground,
+        secondary: surface,
+        onSecondary: foreground,
+        surface: surface,
         onSurface: foreground,
         error: error,
-        onError: background,
+        onError: foreground,
       ),
 
       // Typography
-      fontFamily: fontBody,
       textTheme: baseTextTheme.copyWith(
-        displayLarge: TextStyle(
-          fontFamily: fontDisplay,
-          fontSize: 96,
-          fontWeight: FontWeight.w900,
-          letterSpacing: -2.0,
-          color: foreground,
-          shadows: [Shadow(color: primary.withOpacity(0.5), blurRadius: 10)],
-        ),
-        displayMedium: TextStyle(
-          fontFamily: fontDisplay,
-          fontSize: 72,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -1.5,
-          color: foreground,
-        ),
-        displaySmall: TextStyle(
-          fontFamily: fontDisplay,
-          fontSize: 56,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -1.0,
-          color: foreground,
-        ),
-        headlineLarge: TextStyle(
-          fontFamily: fontDisplay,
-          fontSize: 40,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.5,
-          color: foreground,
-        ),
-        headlineMedium: TextStyle(
-          fontFamily: fontDisplay,
+        displayLarge: const TextStyle(
           fontSize: 32,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w800,
           color: foreground,
         ),
-        headlineSmall: TextStyle(
-          fontFamily: fontDisplay,
+        displayMedium: const TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.w700,
+          color: foreground,
+        ),
+        displaySmall: const TextStyle(
           fontSize: 24,
+          fontWeight: FontWeight.w700,
+          color: foreground,
+        ),
+        headlineLarge: const TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          color: foreground,
+        ),
+        headlineMedium: const TextStyle(
+          fontSize: 20,
           fontWeight: FontWeight.w600,
           color: foreground,
         ),
-        bodyLarge: TextStyle(
-          fontFamily: fontBody,
+        headlineSmall: const TextStyle(
           fontSize: 18,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
           color: foreground,
         ),
-        bodyMedium: TextStyle(
-          fontFamily: fontBody,
+        bodyLarge: const TextStyle(
           fontSize: 16,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w400,
           color: foreground,
         ),
-        bodySmall: TextStyle(
-          fontFamily: fontBody,
+        bodyMedium: const TextStyle(
           fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: foreground,
+        ),
+        bodySmall: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: mutedForeground,
+        ),
+        labelLarge: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: foreground,
+        ),
+        labelMedium: const TextStyle(
+          fontSize: 12,
           fontWeight: FontWeight.w500,
           color: mutedForeground,
         ),
-        labelLarge: TextStyle(
-          fontFamily: fontDisplay,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 2.5,
-          color: foreground,
-        ),
-        labelMedium: TextStyle(
-          fontFamily: fontDisplay,
-          fontSize: 12,
+        labelSmall: const TextStyle(
+          fontSize: 10,
           fontWeight: FontWeight.w500,
-          letterSpacing: 2.0,
-          color: foreground,
-        ),
-        labelSmall: TextStyle(
-          fontFamily: fontMono,
-          fontSize: 11,
-          fontWeight: FontWeight.w400,
-          letterSpacing: 1.5,
-          color: secondary,
+          color: mutedForeground,
         ),
       ),
 
       // ── Input Decoration ──────────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: muted,
+        fillColor: const Color(0xFF333333),
         border: OutlineInputBorder(
-          borderSide: BorderSide(color: borderLight, width: 1),
-          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(4),
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: borderColor, width: 1),
-          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(4),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: secondary, width: 2),
-          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: foreground, width: 1),
+          borderRadius: BorderRadius.circular(4),
         ),
         errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: error, width: 1),
-          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: error, width: 1),
+          borderRadius: BorderRadius.circular(4),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: error, width: 2),
-          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: error, width: 2),
+          borderRadius: BorderRadius.circular(4),
         ),
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
           horizontal: 16,
         ),
-        hintStyle: TextStyle(
-          fontFamily: fontBody,
-          fontStyle: FontStyle.italic,
-          color: mutedForeground,
-          fontSize: 16,
-        ),
-        labelStyle: TextStyle(
-          fontFamily: fontDisplay,
-          fontSize: 12,
+        hintStyle: const TextStyle(color: mutedForeground, fontSize: 16),
+        labelStyle: const TextStyle(fontSize: 16, color: mutedForeground),
+        floatingLabelStyle: const TextStyle(
+          fontSize: 14,
           fontWeight: FontWeight.w600,
-          letterSpacing: 2.5,
-          color: secondary,
+          color: foreground,
         ),
-        floatingLabelStyle: TextStyle(
-          fontFamily: fontDisplay,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 2.5,
-          color: secondary,
-          shadows: [Shadow(color: secondary.withOpacity(0.5), blurRadius: 5)],
-        ),
-        errorStyle: TextStyle(fontFamily: fontBody, fontSize: 12, color: error),
       ),
 
       // ── Elevated Button (Primary) ─────────────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.hovered))
-              return primary.withOpacity(0.8);
-            if (states.contains(WidgetState.disabled)) return muted;
+            if (states.contains(WidgetState.disabled)) {
+              return surface;
+            }
             return primary;
           }),
           foregroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.disabled)) return mutedForeground;
-            return background;
+            if (states.contains(WidgetState.disabled)) {
+              return mutedForeground;
+            }
+            return foreground;
           }),
           shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
           ),
           padding: WidgetStateProperty.all(
-            const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           ),
-          elevation: WidgetStateProperty.all(8),
-          shadowColor: WidgetStateProperty.all(primary.withOpacity(0.5)),
+          elevation: WidgetStateProperty.all(0), // Flat buttons like Netflix
           textStyle: WidgetStateProperty.all(
-            TextStyle(
-              fontFamily: fontDisplay,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 3.0,
-            ),
+            const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -254,38 +173,27 @@ class AppTheme {
       // ── Outlined Button (Secondary) ───────────────────────────
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.hovered))
-              return secondary.withOpacity(0.2);
-            return Colors.transparent;
-          }),
+          backgroundColor: WidgetStateProperty.all(Colors.transparent),
           foregroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.disabled)) return mutedForeground;
-            return secondary;
+            if (states.contains(WidgetState.disabled)) {
+              return mutedForeground;
+            }
+            return foreground;
           }),
           side: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.disabled)) {
-              return BorderSide(
-                color: mutedForeground.withOpacity(0.5),
-                width: 1,
-              );
+              return const BorderSide(color: borderColor, width: 1);
             }
-            return BorderSide(color: secondary, width: 2);
+            return const BorderSide(color: foreground, width: 1);
           }),
           shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
           ),
           padding: WidgetStateProperty.all(
-            const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           ),
-          elevation: WidgetStateProperty.all(0),
           textStyle: WidgetStateProperty.all(
-            TextStyle(
-              fontFamily: fontDisplay,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 3.0,
-            ),
+            const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -293,54 +201,61 @@ class AppTheme {
       // ── Text Button (Ghost) ───────────────────────────────────
       textButtonTheme: TextButtonThemeData(
         style: ButtonStyle(
-          foregroundColor: WidgetStateProperty.all(tertiary),
-          overlayColor: WidgetStateProperty.all(tertiary.withOpacity(0.1)),
+          foregroundColor: WidgetStateProperty.all(mutedForeground),
+          overlayColor: WidgetStateProperty.all(foreground.withOpacity(0.1)),
           padding: WidgetStateProperty.all(
             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           ),
           textStyle: WidgetStateProperty.all(
-            TextStyle(
-              fontFamily: fontBody,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              decoration: TextDecoration.underline,
-            ),
+            const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
           ),
         ),
       ),
 
-      // Card Theme (Glassmorphism base)
+      // Card Theme
       cardTheme: CardThemeData(
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: borderColor, width: 1),
-        ),
-        color: muted,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        color: surface,
       ),
 
-      dividerTheme: DividerThemeData(
+      dividerTheme: const DividerThemeData(
         color: borderColor,
         thickness: 1,
         space: 24,
       ),
 
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         foregroundColor: foreground,
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         titleTextStyle: TextStyle(
-          fontFamily: fontDisplay,
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          letterSpacing: 2.0,
           color: foreground,
-          shadows: [Shadow(color: secondary.withOpacity(0.8), blurRadius: 10)],
+        ),
+      ),
+
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: background, // Deep black for bottom nav
+        selectedItemColor: foreground, // White icon for selected
+        unselectedItemColor: mutedForeground, // Grey for unselected
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        selectedLabelStyle: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

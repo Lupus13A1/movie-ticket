@@ -48,39 +48,27 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: AppTheme.background,
-        appBar: AppBar(
-          title: const Text('MOVIE DETAIL'),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(2.0),
-            child: Container(color: AppTheme.foreground, height: 2.0),
-          ),
-        ),
-        body: const Center(
-          child: CircularProgressIndicator(color: AppTheme.foreground),
-        ),
+        body: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
       );
     }
 
     if (_errorMessage != null || _movieDetails == null) {
       return Scaffold(
         backgroundColor: AppTheme.background,
-        appBar: AppBar(title: const Text('ERROR')),
+        appBar: AppBar(title: const Text('Error')),
         body: Center(
           child: Text(
             _errorMessage ?? 'Failed to load details',
-            style: const TextStyle(
-              fontFamily: AppTheme.fontMono,
-              color: AppTheme.foreground,
-            ),
+            style: const TextStyle(color: AppTheme.foreground),
           ),
         ),
       );
     }
 
     final movie = _movieDetails!;
-    final title = movie['title'] ?? 'UNKNOWN';
+    final title = movie['title'] ?? 'Unknown';
     final overview = movie['overview'] ?? 'No overview available.';
     final posterPath = movie['poster_path'];
     final backdropPath = movie['backdrop_path'];
@@ -91,254 +79,171 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('MOVIE DETAIL'),
-        leading: Semantics(
-          label: 'Navigate back',
-          button: true,
-          child: const BackButton(),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2.0),
-          child: Container(color: AppTheme.foreground, height: 2.0),
-        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: const BackButton(color: AppTheme.foreground),
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // IMAGE SECTION
-            if (backdropPath != null || posterPath != null)
-              Container(
-                margin: const EdgeInsets.fromLTRB(
-                  24,
-                  24,
-                  24,
-                  8,
-                ), // Padding around to show shadow
-                height: 300,
-                width: double.infinity,
-                decoration: AppTheme.cardDecoration(
-                  color: AppTheme.primaryRed,
-                  thickBorder: true,
-                  largeShadow: true,
-                ),
-                child: Image.network(
-                  '${Constants.tmdbImageBaseUrl}${backdropPath ?? posterPath}',
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
-                  errorBuilder: (context, error, stackTrace) => const Center(
-                    child: Icon(
-                      Icons.broken_image,
-                      size: 64,
-                      color: AppTheme.foreground,
+            // HERO BACKDROP WITH GRADIENT
+            Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                if (backdropPath != null || posterPath != null)
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.45,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: NetworkImage(
+                          '${Constants.tmdbImageBaseUrl}${backdropPath ?? posterPath}',
+                        ),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.45,
+                    color: AppTheme.surface,
+                    child: const Center(
+                      child: Icon(
+                        Icons.broken_image,
+                        size: 64,
+                        color: AppTheme.mutedForeground,
+                      ),
+                    ),
+                  ),
+                // Gradient fade to background
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.45,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.transparent, AppTheme.background],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0.6, 1.0],
                     ),
                   ),
                 ),
-              ),
+              ],
+            ),
 
+            // CONTENT
             Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // GENRES
-                  if (genres.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      color: AppTheme.foreground,
-                      child: Text(
-                        genres.join(' • ').toUpperCase(),
-                        style: const TextStyle(
-                          fontFamily: AppTheme.fontMono,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 2.0,
-                          color: AppTheme.background,
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 16),
-
-                  // TITLE
+                  // Title
                   Text(
-                    title.toUpperCase(),
+                    title,
                     style: const TextStyle(
-                      fontSize: 56,
-                      fontWeight: FontWeight.w900,
-                      height: 0.95,
-                      letterSpacing: -1.5,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
                       color: AppTheme.foreground,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
 
-                  // RATING AND RUNTIME
+                  // Metadata (Rating, Runtime, Year)
                   Row(
                     children: [
-                      // Rating Box
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        decoration: AppTheme.cardDecoration(
-                          color: AppTheme.primaryBlue,
-                          thickBorder: true,
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              color: AppTheme.background,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              voteAverage.toStringAsFixed(1),
-                              style: const TextStyle(
-                                fontFamily: AppTheme.fontMono,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                color: AppTheme.background,
-                              ),
-                            ),
-                          ],
+                      const Icon(Icons.star, color: AppTheme.primary, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        voteAverage.toStringAsFixed(1),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.foreground,
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // Runtime
+                      Text(
+                        '${movie['release_date']?.toString().split('-').first ?? ''}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppTheme.mutedForeground,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                          horizontal: 6,
+                          vertical: 2,
                         ),
-                        decoration: AppTheme.cardDecoration(
-                          color: AppTheme.primaryYellow,
-                          thickBorder: true,
+                        decoration: BoxDecoration(
+                          color: AppTheme.surface,
+                          borderRadius: BorderRadius.circular(4),
                         ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.schedule,
-                              color: AppTheme.foreground,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '$runtime MIN',
-                              style: const TextStyle(
-                                fontFamily: AppTheme.fontMono,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                color: AppTheme.foreground,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          '$runtime m',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.mutedForeground,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 16),
 
-                  // OVERVIEW TITLE
-                  Container(
+                  // BOOK TICKETS BUTTON
+                  SizedBox(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: AppTheme.foreground,
-                          width: 4,
-                        ),
-                      ),
-                    ),
-                    child: Semantics(
-                      header: true,
-                      child: const Text(
-                        'THE STORY',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 2.0,
-                          color: AppTheme.foreground,
-                        ),
-                      ),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ShowtimeScreen(
+                              movieId: widget.movieId,
+                              movieTitle: title,
+                              posterPath: posterPath ?? '',
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.local_activity),
+                      label: const Text('Book Tickets'),
                     ),
                   ),
                   const SizedBox(height: 24),
 
-                  // OVERVIEW TEXT
+                  // Genres
+                  if (genres.isNotEmpty)
+                    Text(
+                      genres.join(' • '),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppTheme.foreground,
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+
+                  // Overview Text
                   Text(
                     overview,
                     style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      height: 1.6,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                      height: 1.5,
                       color: AppTheme.foreground,
                     ),
                   ),
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 48),
                 ],
               ),
             ),
           ],
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            24,
-            8,
-            32,
-            32,
-          ), // Padding for shadow
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ShowtimeScreen(
-                    movieId: widget.movieId,
-                    movieTitle: title,
-                    posterPath: posterPath ?? '',
-                  ),
-                ),
-              );
-            },
-            child: Container(
-              height: 64,
-              decoration: AppTheme.cardDecoration(
-                color: AppTheme.primaryRed,
-                thickBorder: true,
-                largeShadow: true,
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'BOOK TICKETS',
-                    style: TextStyle(
-                      fontFamily: AppTheme.fontMono,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 3.0,
-                      color: AppTheme.background,
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Icon(
-                    Icons.arrow_forward,
-                    color: AppTheme.background,
-                    size: 24,
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
       ),
     );

@@ -35,7 +35,6 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
 
   Future<void> _initData() async {
     final firebaseService = context.read<FirebaseService>();
-    // Seed data if none exists
     await firebaseService.generateMockShowtimes(
       widget.movieId,
       widget.movieTitle,
@@ -64,12 +63,14 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
 
   List<Showtime> _getShowtimesForSelectedDate() {
     final now = DateTime.now();
-    final isSelectedToday = _selectedDate.year == now.year &&
+    final isSelectedToday =
+        _selectedDate.year == now.year &&
         _selectedDate.month == now.month &&
         _selectedDate.day == now.day;
 
     return _showtimes.where((st) {
-      final isSameDay = st.time.year == _selectedDate.year &&
+      final isSameDay =
+          st.time.year == _selectedDate.year &&
           st.time.month == _selectedDate.month &&
           st.time.day == _selectedDate.day;
 
@@ -92,7 +93,6 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
       }
       map[st.cinemaName]!.add(st);
     }
-    // Sort times
     for (var list in map.values) {
       list.sort((a, b) => a.time.compareTo(b.time));
     }
@@ -105,31 +105,23 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
     final dailyShowtimes = _getShowtimesForSelectedDate();
     final groupedShowtimes = _groupShowtimesByCinema(dailyShowtimes);
     final now = DateTime.now();
-    final isSelectedToday = _selectedDate.year == now.year &&
+    final isSelectedToday =
+        _selectedDate.year == now.year &&
         _selectedDate.month == now.month &&
         _selectedDate.day == now.day;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: Text(widget.movieTitle.toUpperCase()),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2.0),
-          child: Container(color: AppTheme.foreground, height: 2.0),
-        ),
-      ),
+      backgroundColor: AppTheme.background,
+      appBar: AppBar(title: Text(widget.movieTitle)),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // DATE SELECTOR
           Container(
-            height: 90,
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: AppTheme.foreground, width: 2),
-              ),
-            ),
+            height: 80,
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               itemCount: dates.length,
               itemBuilder: (context, index) {
@@ -145,42 +137,33 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
                     });
                   },
                   child: Container(
-                    width: 80,
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 4,
-                    ),
+                    width: 64,
+                    margin: const EdgeInsets.only(right: 12),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppTheme.foreground
-                          : AppTheme.background,
-                      border: Border.all(color: AppTheme.foreground, width: 2),
+                      color: isSelected ? AppTheme.primary : AppTheme.surface,
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          DateFormat(
-                            'E',
-                          ).format(date).toUpperCase(), // e.g., MON
+                          DateFormat('MMM').format(date).toUpperCase(),
                           style: TextStyle(
-                            fontFamily: AppTheme.fontMono,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: isSelected
-                                ? AppTheme.background
-                                : AppTheme.foreground,
+                                ? AppTheme.foreground
+                                : AppTheme.mutedForeground,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
-                          '${date.day}', // e.g., 15
+                          '${date.day}',
                           style: TextStyle(
-                            fontFamily: AppTheme.fontDisplay,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
                             color: isSelected
-                                ? AppTheme.background
+                                ? AppTheme.foreground
                                 : AppTheme.foreground,
                           ),
                         ),
@@ -192,56 +175,45 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
             ),
           ),
 
+          const Divider(),
+
           // SHOWTIMES LIST
           Expanded(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(
-                      color: AppTheme.foreground,
-                    ),
+                    child: CircularProgressIndicator(color: AppTheme.primary),
                   )
                 : groupedShowtimes.isEmpty
                 ? Center(
                     child: Text(
                       isSelectedToday
-                          ? 'ALL SHOWTIMES FOR TODAY HAVE PASSED'
-                          : 'NO SHOWTIMES AVAILABLE',
-                      style: const TextStyle(
-                        fontFamily: AppTheme.fontMono,
-                        color: AppTheme.foreground,
-                      ),
+                          ? 'No showtimes remaining today'
+                          : 'No showtimes available',
+                      style: const TextStyle(color: AppTheme.mutedForeground),
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: const EdgeInsets.all(16.0),
                     itemCount: groupedShowtimes.length,
                     itemBuilder: (context, index) {
                       final cinemaName = groupedShowtimes.keys.elementAt(index);
                       final times = groupedShowtimes[cinemaName]!;
 
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 32.0),
+                        padding: const EdgeInsets.only(bottom: 24.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // CINEMA NAME
                             Text(
-                              cinemaName.toUpperCase(),
+                              cinemaName,
                               style: const TextStyle(
-                                fontFamily: AppTheme.fontDisplay,
-                                fontSize: 24,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
                                 color: AppTheme.foreground,
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Container(
-                              height: 2,
-                              width: double.infinity,
-                              color: AppTheme.foreground,
-                            ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
 
                             // TIME BUTTONS
                             Wrap(
@@ -250,16 +222,15 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
                               children: times.map((st) {
                                 final bool isPast = st.isPast;
                                 final bool isClosingSoon = st.isClosingSoon;
-                                final Color borderColor = isPast
-                                    ? AppTheme.muted
-                                    : (isClosingSoon
-                                        ? Colors.orange
-                                        : AppTheme.foreground);
+                                final Color bgColor = isPast
+                                    ? AppTheme.surface.withOpacity(0.5)
+                                    : AppTheme.surface;
                                 final Color textColor = isPast
-                                    ? AppTheme.muted
+                                    ? AppTheme.mutedForeground
                                     : AppTheme.foreground;
 
                                 return InkWell(
+                                  borderRadius: BorderRadius.circular(4),
                                   onTap: isPast
                                       ? null
                                       : () {
@@ -269,8 +240,10 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
                                               builder: (context) =>
                                                   SeatSelectionScreen(
                                                     showtime: st,
-                                                    movieTitle: widget.movieTitle,
-                                                    posterPath: widget.posterPath,
+                                                    movieTitle:
+                                                        widget.movieTitle,
+                                                    posterPath:
+                                                        widget.posterPath,
                                                   ),
                                             ),
                                           );
@@ -281,46 +254,36 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
                                       vertical: 12,
                                     ),
                                     decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: borderColor,
-                                        width: 2,
-                                      ),
+                                      color: bgColor,
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: isClosingSoon && !isPast
+                                          ? Border.all(
+                                              color: AppTheme.primary,
+                                              width: 1,
+                                            )
+                                          : null,
                                     ),
                                     child: Column(
                                       children: [
                                         Text(
                                           DateFormat('HH:mm').format(st.time),
                                           style: TextStyle(
-                                            fontFamily: AppTheme.fontMono,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
                                             color: textColor,
                                           ),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          '${st.format} | ฿${st.price.toInt()}',
+                                          '${st.format}',
                                           style: TextStyle(
-                                            fontFamily: AppTheme.fontMono,
-                                            fontSize: 10,
+                                            fontSize: 12,
                                             fontWeight: FontWeight.w500,
                                             color: isPast
-                                                ? AppTheme.muted
+                                                ? AppTheme.mutedForeground
                                                 : AppTheme.mutedForeground,
                                           ),
                                         ),
-                                        if (isClosingSoon && !isPast) ...[
-                                          const SizedBox(height: 4),
-                                          const Text(
-                                            'CLOSING SOON',
-                                            style: TextStyle(
-                                              fontFamily: AppTheme.fontMono,
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.w800,
-                                              color: Colors.orange,
-                                            ),
-                                          ),
-                                        ],
                                       ],
                                     ),
                                   ),

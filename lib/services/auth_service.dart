@@ -15,12 +15,18 @@ class AuthService extends ChangeNotifier {
     });
   }
 
-  Future<void> register(String email, String password) async {
+  Future<void> register(String email, String password, String name) async {
     try {
-      await _auth.createUserWithEmailAndPassword(
+      final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      if (userCredential.user != null) {
+        await userCredential.user!.updateDisplayName(name);
+        await userCredential.user!.reload();
+        _user = _auth.currentUser;
+        notifyListeners();
+      }
     } catch (e) {
       rethrow;
     }

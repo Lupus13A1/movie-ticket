@@ -223,14 +223,14 @@ class FirebaseService {
 
     if (snapshot.exists) {
       final data = snapshot.value as Map<dynamic, dynamic>;
-      final bookings = data.entries
-          .map(
-            (e) => Booking.fromMap(
-              e.key.toString(),
-              e.value as Map<dynamic, dynamic>,
-            ),
-          )
-          .toList();
+      print('DEBUG RAW FIREBASE BOOKINGS: $data');
+      final bookings = data.entries.map((e) {
+        print('DEBUG PARSING BOOKING ${e.key}: ${e.value}');
+        return Booking.fromMap(
+          e.key.toString(),
+          e.value as Map<dynamic, dynamic>,
+        );
+      }).toList();
 
       // Auto-update status for past bookings still marked as confirmed
       for (final booking in bookings) {

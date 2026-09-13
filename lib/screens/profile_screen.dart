@@ -13,149 +13,148 @@ class ProfileScreen extends StatelessWidget {
     final authService = context.watch<AuthService>();
     final user = authService.user;
 
-    // Use Dicebear for avatar, utilizing the user's email as the seed.
+    // Use Dicebear for avatar
     final seed = user?.email ?? 'CinemaUser';
     final String avatarUrl =
-        'https://api.dicebear.com/7.x/avataaars/png?seed=$seed&backgroundColor=ffffff';
+        'https://api.dicebear.com/7.x/avataaars/png?seed=$seed&backgroundColor=b6e3f4';
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // HEADER SECTION
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: AppTheme.foreground, width: 4),
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // HEADER SECTION
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Row(
+                children: [
+                  // AVATAR
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppTheme.borderColor),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(40),
+                      child: Image.network(
+                        avatarUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.person,
+                              size: 48,
+                              color: AppTheme.mutedForeground,
+                            ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  // NAME & EMAIL
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user?.displayName ?? 'Netflix User',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.foreground,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          user?.email ?? 'no_email@provided.com',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppTheme.mutedForeground,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Column(
-              children: [
-                // AVATAR
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppTheme.background,
-                    border: Border.all(color: AppTheme.foreground, width: 2),
-                    shape: BoxShape.rectangle, // Strictly zero radius
-                  ),
-                  child: Image.network(
-                    avatarUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => const Icon(
-                      Icons.person,
-                      size: 64,
-                      color: AppTheme.foreground,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // NAME
-                Text(
-                  (user?.displayName ?? 'USER ACCOUNT').toUpperCase(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontFamily: AppTheme.fontDisplay,
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
-                    color: AppTheme.foreground,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // EMAIL
-                Text(
-                  user?.email?.toUpperCase() ?? 'NO EMAIL PROVIDED',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontFamily: AppTheme.fontMono,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.5,
-                    color: AppTheme.foreground,
-                  ),
-                ),
-              ],
-            ),
-          ),
 
-          // MENU LIST
-          _buildMenuTile(
-            icon: Icons.person_outline,
-            title: 'ACCOUNT SETTINGS',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const EditProfileScreen(),
-                ),
-              );
-            },
-          ),
-          _buildMenuTile(
-            icon: Icons.credit_card,
-            title: 'PAYMENT METHODS',
-            onTap: () {
-              _showComingSoon(context);
-            },
-          ),
-          _buildMenuTile(
-            icon: Icons.notifications_outlined,
-            title: 'NOTIFICATIONS',
-            onTap: () {
-              _showComingSoon(context);
-            },
-          ),
-          _buildMenuTile(
-            icon: Icons.language,
-            title: 'LANGUAGE',
-            subtitle: 'ENGLISH',
-            onTap: () {
-              _showComingSoon(context);
-            },
-          ),
-          _buildMenuTile(
-            icon: Icons.help_outline,
-            title: 'HELP & SUPPORT',
-            onTap: () {
-              _showComingSoon(context);
-            },
-          ),
+            const Divider(),
 
-          // LOGOUT BUTTON
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: OutlinedButton(
-              onPressed: () async {
-                await authService.logout();
-                if (context.mounted) {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                    ),
-                    (route) => false,
-                  );
-                }
+            // MENU LIST
+            _buildMenuTile(
+              icon: Icons.edit_outlined,
+              title: 'Manage Profiles',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EditProfileScreen(),
+                  ),
+                );
               },
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppTheme.foreground, width: 2),
-                padding: const EdgeInsets.symmetric(vertical: 20),
-              ),
-              child: const Text(
-                'LOGOUT',
-                style: TextStyle(
-                  fontFamily: AppTheme.fontMono,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 2.0,
+            ),
+            _buildMenuTile(
+              icon: Icons.credit_card_outlined,
+              title: 'Payment Details',
+              onTap: () {
+                _showComingSoon(context);
+              },
+            ),
+            _buildMenuTile(
+              icon: Icons.notifications_none,
+              title: 'Notifications',
+              onTap: () {
+                _showComingSoon(context);
+              },
+            ),
+            _buildMenuTile(
+              icon: Icons.settings_outlined,
+              title: 'App Settings',
+              onTap: () {
+                _showComingSoon(context);
+              },
+            ),
+            _buildMenuTile(
+              icon: Icons.help_outline,
+              title: 'Help',
+              onTap: () {
+                _showComingSoon(context);
+              },
+            ),
+
+            const Divider(),
+
+            // LOGOUT BUTTON
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Center(
+                child: TextButton(
+                  onPressed: () async {
+                    await authService.logout();
+                    if (context.mounted) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                        (route) => false,
+                      );
+                    }
+                  },
+                  child: const Text(
+                    'Sign Out',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.mutedForeground,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 40),
-        ],
+            const SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
@@ -163,10 +162,7 @@ class ProfileScreen extends StatelessWidget {
   void _showComingSoon(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text(
-          'COMING SOON',
-          style: TextStyle(fontFamily: AppTheme.fontMono),
-        ),
+        content: Text('Coming Soon'),
         duration: Duration(seconds: 1),
       ),
     );
@@ -175,56 +171,30 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildMenuTile({
     required IconData icon,
     required String title,
-    String? subtitle,
-    required VoidCallback onTap,
+    VoidCallback? onTap,
   }) {
     return InkWell(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-        decoration: const BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: AppTheme.foreground, width: 2),
-          ),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Row(
           children: [
-            Icon(icon, size: 28, color: AppTheme.foreground),
+            Icon(icon, size: 28, color: AppTheme.mutedForeground),
             const SizedBox(width: 24),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontFamily: AppTheme.fontMono,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.0,
-                      color: AppTheme.foreground,
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontFamily: AppTheme.fontMono,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.5,
-                        color: AppTheme.foreground,
-                      ),
-                    ),
-                  ],
-                ],
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.foreground,
+                ),
               ),
             ),
             const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: AppTheme.foreground,
+              Icons.chevron_right,
+              size: 24,
+              color: AppTheme.mutedForeground,
             ),
           ],
         ),

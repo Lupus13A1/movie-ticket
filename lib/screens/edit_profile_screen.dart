@@ -40,19 +40,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final user = context.read<AuthService>().user;
       if (user != null) {
         await user.updateDisplayName(_nameController.text.trim());
-        // Force reload user to get the new display name in state
         await user.reload();
-        // Notify listeners if necessary, but Firebase Auth state stream might handle it.
       }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              'PROFILE UPDATED SUCCESSFULLY',
-              style: TextStyle(fontFamily: AppTheme.fontMono),
-            ),
-            backgroundColor: Colors.transparent,
+            content: Text('Profile updated successfully'),
+            backgroundColor: AppTheme.primary,
           ),
         );
         Navigator.pop(context);
@@ -75,18 +70,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('EDIT PROFILE'),
-        leading: Semantics(
-          label: 'Navigate back',
-          button: true,
-          child: const BackButton(),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2.0),
-          child: Container(color: AppTheme.foreground, height: 2.0),
-        ),
+        title: const Text('Edit Profile'),
+        backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -96,13 +83,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
-                labelText: 'DISPLAY NAME',
-                hintText: 'ENTER YOUR NAME',
-                filled: true,
-                fillColor: AppTheme.muted,
+                labelText: 'Display Name',
+                hintText: 'Enter your name',
               ),
               style: const TextStyle(
-                fontFamily: AppTheme.fontBody,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.foreground,
@@ -112,11 +96,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 16),
               Text(
                 _errorMessage!,
-                style: const TextStyle(
-                  fontFamily: AppTheme.fontMono,
-                  fontSize: 12,
-                  color: AppTheme.foreground,
-                ),
+                style: const TextStyle(fontSize: 12, color: AppTheme.error),
               ),
             ],
             const SizedBox(height: 48),
@@ -129,11 +109,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         height: 24,
                         width: 24,
                         child: CircularProgressIndicator(
-                          color: AppTheme.background,
+                          color: AppTheme.foreground,
                           strokeWidth: 2,
                         ),
                       )
-                    : const Text('SAVE CHANGES'),
+                    : const Text('Save Changes'),
               ),
             ),
           ],

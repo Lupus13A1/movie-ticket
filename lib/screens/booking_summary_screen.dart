@@ -6,6 +6,7 @@ import '../models/showtime.dart';
 import '../services/auth_service.dart';
 import '../services/firebase_service.dart';
 import '../theme/app_theme.dart';
+import '../constants.dart';
 import 'booking_success_screen.dart';
 
 class BookingSummaryScreen extends StatefulWidget {
@@ -83,14 +84,10 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'SEAT HOLD EXPIRED — PLEASE SELECT SEATS AGAIN',
-            style: TextStyle(fontFamily: AppTheme.fontMono),
-          ),
-          backgroundColor: Colors.red,
+          content: Text('Seat hold expired. Please select seats again.'),
+          backgroundColor: AppTheme.error,
         ),
       );
-      // Pop back to seat selection
       Navigator.of(context).pop();
     }
   }
@@ -102,23 +99,18 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   }
 
   Future<void> _confirmBooking() async {
-    // Check if hold has expired before confirming
     if (widget.holdExpiresAt != null &&
         DateTime.now().isAfter(widget.holdExpiresAt!)) {
       _onHoldExpired();
       return;
     }
 
-    // Check if showtime has passed
     if (widget.showtime.isPast) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              'THIS SHOWTIME HAS ALREADY PASSED',
-              style: TextStyle(fontFamily: AppTheme.fontMono),
-            ),
-            backgroundColor: Colors.red,
+            content: Text('This showtime has already passed'),
+            backgroundColor: AppTheme.error,
           ),
         );
       }
@@ -132,7 +124,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
       final firebaseService = context.read<FirebaseService>();
       final user = authService.user;
 
-      if (user == null) throw Exception('USER NOT LOGGED IN');
+      if (user == null) throw Exception('User not logged in');
 
       await firebaseService.bookSeats(
         showtimeId: widget.showtime.id,
@@ -147,7 +139,6 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
       );
 
       if (mounted) {
-        // Success
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (context) => BookingSuccessScreen(
@@ -159,7 +150,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
               totalPrice: widget.totalPrice,
             ),
           ),
-          (route) => route.isFirst, // Pop back to home as the root
+          (route) => route.isFirst,
         );
       }
     } catch (e) {
@@ -167,11 +158,8 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
         setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'BOOKING FAILED: ${e.toString()}',
-              style: const TextStyle(fontFamily: AppTheme.fontMono),
-            ),
-            backgroundColor: Colors.transparent,
+            content: Text('Booking failed: ${e.toString()}'),
+            backgroundColor: AppTheme.error,
           ),
         );
       }
@@ -186,24 +174,20 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            label.toUpperCase(),
+            label,
             style: const TextStyle(
-              fontFamily: AppTheme.fontMono,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontSize: 14,
               color: AppTheme.mutedForeground,
-              letterSpacing: 1.0,
             ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
-              value.toUpperCase(),
+              value,
               textAlign: TextAlign.right,
               style: const TextStyle(
-                fontFamily: AppTheme.fontMono,
                 fontSize: 14,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 color: AppTheme.foreground,
               ),
             ),
@@ -216,28 +200,28 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('SUMMARY'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2.0),
-          child: Container(color: AppTheme.foreground, height: 2.0),
-        ),
+        title: const Text('Summary'),
+        backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // HOLD TIMER WARNING
+            // HOLD TIMER
             if (_remainingSeconds > 0)
               Container(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(12.0),
                 margin: const EdgeInsets.only(bottom: 24.0),
                 decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: _remainingSeconds <= 60 ? Colors.red : Colors.orange,
-                    width: 2,
+                    color: _remainingSeconds <= 60
+                        ? AppTheme.error
+                        : Colors.transparent,
                   ),
                 ),
                 child: Row(
@@ -245,34 +229,29 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
                     Icon(
                       Icons.timer,
                       color: _remainingSeconds <= 60
-                          ? Colors.red
-                          : Colors.orange,
+                          ? AppTheme.error
+                          : AppTheme.foreground,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'SEATS HELD FOR',
+                          const Text(
+                            'Complete booking within',
                             style: TextStyle(
-                              fontFamily: AppTheme.fontMono,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: _remainingSeconds <= 60
-                                  ? Colors.red
-                                  : Colors.orange,
+                              fontSize: 12,
+                              color: AppTheme.mutedForeground,
                             ),
                           ),
                           Text(
                             _formatTimer(_remainingSeconds),
                             style: TextStyle(
-                              fontFamily: AppTheme.fontDisplay,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w900,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
                               color: _remainingSeconds <= 60
-                                  ? Colors.red
-                                  : Colors.orange,
+                                  ? AppTheme.error
+                                  : AppTheme.foreground,
                             ),
                           ),
                         ],
@@ -284,94 +263,120 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
 
             // RECEIPT CARD
             Container(
-              padding: const EdgeInsets.all(24.0),
               decoration: BoxDecoration(
-                border: Border.all(color: AppTheme.foreground, width: 2),
+                color: AppTheme.surface,
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    widget.movieTitle.toUpperCase(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: AppTheme.fontDisplay,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: AppTheme.foreground,
-                      height: 1.1,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Container(height: 2, color: AppTheme.foreground),
-                  const SizedBox(height: 24),
-
-                  _buildSummaryRow('Cinema', widget.showtime.cinemaName),
-                  _buildSummaryRow('Format', widget.showtime.format),
-                  _buildSummaryRow(
-                    'Date',
-                    DateFormat('dd MMM yyyy').format(widget.showtime.time),
-                  ),
-                  _buildSummaryRow(
-                    'Time',
-                    DateFormat('HH:mm').format(widget.showtime.time),
-                  ),
-                  _buildSummaryRow('Seats', widget.selectedSeats.join(', ')),
-
-                  const SizedBox(height: 24),
-                  Container(height: 2, color: AppTheme.foreground),
-                  const SizedBox(height: 24),
-
+                  // Poster & Title
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'TOTAL',
-                        style: TextStyle(
-                          fontFamily: AppTheme.fontDisplay,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.foreground,
+                      if (widget.posterPath.isNotEmpty)
+                        ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                          ),
+                          child: Image.network(
+                            '${Constants.tmdbImageBaseUrl}${widget.posterPath}',
+                            width: 100,
+                            height: 150,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '฿${widget.totalPrice.toInt()}',
-                        style: const TextStyle(
-                          fontFamily: AppTheme.fontDisplay,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.foreground,
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            widget.movieTitle,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.foreground,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
+
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        _buildSummaryRow('Cinema', widget.showtime.cinemaName),
+                        _buildSummaryRow('Format', widget.showtime.format),
+                        _buildSummaryRow(
+                          'Date',
+                          DateFormat(
+                            'dd MMM yyyy',
+                          ).format(widget.showtime.time),
+                        ),
+                        _buildSummaryRow(
+                          'Time',
+                          DateFormat('HH:mm').format(widget.showtime.time),
+                        ),
+                        _buildSummaryRow(
+                          'Seats',
+                          widget.selectedSeats.join(', '),
+                        ),
+
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12.0),
+                          child: Divider(color: AppTheme.borderColor),
+                        ),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Total Payment',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.foreground,
+                              ),
+                            ),
+                            Text(
+                              '฿${widget.totalPrice.toInt()}',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                color: AppTheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 48),
-
-            // CONFIRM BUTTON
-            SizedBox(
-              height: 64,
-              child: ElevatedButton(
-                onPressed: _isProcessing ? null : _confirmBooking,
-                child: _isProcessing
-                    ? const CircularProgressIndicator(
-                        color: AppTheme.background,
-                      )
-                    : const Text(
-                        'CONFIRM BOOKING',
-                        style: TextStyle(
-                          fontFamily: AppTheme.fontMono,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 2.0,
-                        ),
-                      ),
-              ),
-            ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ElevatedButton(
+            onPressed: _isProcessing ? null : _confirmBooking,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: _isProcessing
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: AppTheme.foreground,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text('Confirm Booking'),
+          ),
         ),
       ),
     );

@@ -64,13 +64,25 @@ class Booking {
     return BookingStatus.confirmed;
   }
 
+  static List<String> _parseSeats(
+    dynamic seatsData,
+    Map<dynamic, dynamic> map,
+  ) {
+    dynamic data = seatsData ?? map['bookedSeats'] ?? map['selectedSeats'];
+    if (data == null) return [];
+    if (data is List) return data.map((e) => e.toString()).toList();
+    if (data is Map) return data.values.map((e) => e.toString()).toList();
+    if (data is String) return data.split(',').map((e) => e.trim()).toList();
+    return [];
+  }
+
   factory Booking.fromMap(String id, Map<dynamic, dynamic> map) {
     return Booking(
       id: id,
       userId: map['userId'] ?? '',
       showtimeId: map['showtimeId'] ?? '',
       movieTitle: map['movieTitle'] ?? '',
-      seats: List<String>.from(map['seats'] ?? []),
+      seats: _parseSeats(map['seats'], map),
       totalPrice: (map['totalPrice'] ?? 0).toDouble(),
       timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] ?? 0),
       posterPath: map['posterPath'] ?? '',

@@ -43,65 +43,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
         builder: (context, child) {
-          return Stack(
-            children: [
-              // Cyberpunk Background
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF1A0033), // Dark Purple
-                      Color(0xFF001133), // Dark Blue
-                      Color(0xFF050510), // Deep Dark
-                    ],
-                  ),
-                ),
-              ),
-              // Glowing Orbs
-              Positioned(
-                top: -100,
-                left: -100,
-                child: Container(
-                  width: 300,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppTheme.primary.withOpacity(0.15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primary.withOpacity(0.3),
-                        blurRadius: 100,
-                        spreadRadius: 50,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -100,
-                right: -100,
-                child: Container(
-                  width: 300,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppTheme.secondary.withOpacity(0.15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.secondary.withOpacity(0.3),
-                        blurRadius: 100,
-                        spreadRadius: 50,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // The actual app content
-              if (child != null) child,
-            ],
-          );
+          return child!;
         },
         home: const AuthWrapper(),
       ),

@@ -32,7 +32,6 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
   late final DatabaseReference _bookedSeatsRef;
   late final DatabaseReference _seatHoldsRef;
 
-  // Seat hold timer
   Timer? _holdTimer;
   DateTime? _holdExpiresAt;
   int _remainingSeconds = 0;
@@ -57,7 +56,6 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _holdTimer?.cancel();
-    // Release held seats when leaving the screen
     _releaseAllHeldSeats();
     super.dispose();
   }
@@ -66,7 +64,6 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
-      // Release seats when app goes to background or is closed
       _releaseAllHeldSeats();
     }
   }
@@ -80,9 +77,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
           seats: List.from(_selectedSeats),
           userId: _userId!,
         );
-      } catch (_) {
-        // Best effort cleanup — don't crash if release fails
-      }
+      } catch (_) {}
     }
   }
 
@@ -122,11 +117,8 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'SEAT HOLD EXPIRED — PLEASE SELECT AGAIN',
-            style: TextStyle(fontFamily: AppTheme.fontMono),
-          ),
-          backgroundColor: Colors.red,
+          content: Text('Seat hold expired. Please select again.'),
+          backgroundColor: AppTheme.error,
         ),
       );
     }
@@ -156,17 +148,14 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
       }
     });
 
-    // Update holds in Firebase
     if (_userId != null) {
       if (_selectedSeats.contains(seatId)) {
-        // Hold the newly selected seat
         await firebaseService.holdSeats(
           showtimeId: widget.showtime.id,
           seats: [seatId],
           userId: _userId!,
         );
       } else {
-        // Release the deselected seat
         await firebaseService.releaseSeats(
           showtimeId: widget.showtime.id,
           seats: [seatId],
@@ -175,7 +164,6 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
       }
     }
 
-    // Start or reset the hold timer when seats are selected
     if (_selectedSeats.isNotEmpty) {
       _startHoldTimer();
     } else {
@@ -191,69 +179,88 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
     String seatId,
     List<String> bookedSeats,
     Map<String, String> heldByOthers,
+    double seatSize,
   ) {
     final isBooked = bookedSeats.contains(seatId);
     final isSelected = _selectedSeats.contains(seatId);
     final isHeldByOther = heldByOthers.containsKey(seatId);
 
-    Color bgColor = AppTheme.background;
-    Color borderColor = AppTheme.foreground;
-    Color textColor = AppTheme.foreground;
+    Color bgColor = AppTheme.surface;
+    Color borderColor = Colors.transparent;
+    Color textColor = AppTheme.mutedForeground;
 
     if (isBooked) {
-      bgColor = AppTheme.muted;
-      borderColor = AppTheme.mutedForeground;
-      textColor = AppTheme.mutedForeground;
+      bgColor = AppTheme.background;
+      borderColor = AppTheme.surface;
+      textColor = AppTheme.surface; // almost invisible
     } else if (isHeldByOther) {
-      bgColor = Colors.orange.withValues(alpha: 0.3);
-      borderColor = Colors.orange;
-      textColor = Colors.orange;
+      bgColor = AppTheme.surface;
+      borderColor = AppTheme.primaryYellow;
+      textColor = AppTheme.primaryYellow;
     } else if (isSelected) {
-      bgColor = AppTheme.foreground;
-      textColor = AppTheme.background;
+      bgColor = AppTheme.primary;
+      textColor = AppTheme.foreground;
+    } else {
+      // Available
+      bgColor = AppTheme.surface;
+      textColor = AppTheme.foreground;
     }
 
     return GestureDetector(
       onTap: () => _toggleSeat(seatId, bookedSeats, heldByOthers),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: seatSize,
+        height: seatSize,
         margin: const EdgeInsets.all(4.0),
         decoration: BoxDecoration(
           color: bgColor,
-          border: Border.all(color: borderColor, width: 2),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          seatId,
-          style: TextStyle(
-            fontFamily: AppTheme.fontMono,
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            color: textColor,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: borderColor,
+            width: isSelected || isHeldByOther ? 1.5 : 0,
           ),
         ),
+        alignment: Alignment.center,
+        child: isBooked
+            ? const Icon(Icons.close, size: 16, color: AppTheme.surface)
+            : Text(
+                seatId,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
       ),
     );
   }
 
-  Widget _buildLegendItem(String label, Color bgColor, Color borderColor) {
+  Widget _buildLegendItem(
+    String label,
+    Color bgColor, {
+    Color? iconColor,
+    IconData? icon,
+  }) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 16,
           height: 16,
           decoration: BoxDecoration(
             color: bgColor,
-            border: Border.all(color: borderColor, width: 2),
+            borderRadius: BorderRadius.circular(4),
           ),
+          child: icon != null ? Icon(icon, size: 12, color: iconColor) : null,
         ),
         const SizedBox(width: 8),
         Text(
-          label.toUpperCase(),
+          label,
           style: const TextStyle(
-            fontFamily: AppTheme.fontMono,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.foreground,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.mutedForeground,
           ),
         ),
       ],
@@ -262,34 +269,30 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Calculate seat size based on screen width (8 cols + 1 aisle + padding)
+    final double maxSeatSize = (screenWidth - 48 - (8 * 8) - 24) / 8;
+    final double seatSize = maxSeatSize > 40 ? 40 : maxSeatSize;
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('SELECT SEATS'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2.0),
-          child: Container(color: AppTheme.foreground, height: 2.0),
-        ),
+        title: const Text('Select Seats'),
+        backgroundColor: Colors.transparent,
       ),
       body: StreamBuilder<DatabaseEvent>(
         stream: _bookedSeatsRef.onValue,
         builder: (context, bookedSnapshot) {
           if (bookedSnapshot.hasError) {
-            return const Center(
-              child: Text(
-                'ERROR LOADING SEATS',
-                style: TextStyle(fontFamily: AppTheme.fontMono),
-              ),
-            );
+            return const Center(child: Text('Error loading seats'));
           }
           if (bookedSnapshot.connectionState == ConnectionState.waiting &&
               !bookedSnapshot.hasData) {
             return const Center(
-              child: CircularProgressIndicator(color: AppTheme.foreground),
+              child: CircularProgressIndicator(color: AppTheme.primary),
             );
           }
 
-          // Parse booked seats from Firebase
           List<String> bookedSeats = [];
           if (bookedSnapshot.hasData &&
               bookedSnapshot.data!.snapshot.value != null) {
@@ -298,13 +301,11 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
             bookedSeats = dataList.map((e) => e.toString()).toList();
           }
 
-          // If a selected seat was just booked by someone else, remove it
           _selectedSeats.removeWhere((seat) => bookedSeats.contains(seat));
 
           return StreamBuilder<DatabaseEvent>(
             stream: _seatHoldsRef.onValue,
             builder: (context, holdsSnapshot) {
-              // Parse held seats by other users
               Map<String, String> heldByOthers = {};
               if (holdsSnapshot.hasData &&
                   holdsSnapshot.data!.snapshot.value != null) {
@@ -323,105 +324,112 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
                 }
               }
 
-              // Remove selected seats that are now held by others
               _selectedSeats.removeWhere(
                 (seat) => heldByOthers.containsKey(seat),
               );
 
               return Column(
                 children: [
+                  const SizedBox(height: 16),
+                  // SCREEN INDICATOR (Netflix curved line)
+                  Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      Container(
+                        height: 30,
+                        margin: const EdgeInsets.symmetric(horizontal: 32),
+                        decoration: BoxDecoration(
+                          border: const Border(
+                            top: BorderSide(color: AppTheme.primary, width: 3),
+                          ),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.elliptical(200, 20),
+                            topRight: Radius.elliptical(200, 20),
+                          ),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppTheme.primary.withOpacity(0.3),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          'SCREEN',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 2.0,
+                            color: AppTheme.mutedForeground,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 32),
-
-                  // SCREEN INDICATOR
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 48),
-                    height: 4,
-                    width: double.infinity,
-                    color: AppTheme.foreground,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'SCREEN',
-                    style: TextStyle(
-                      fontFamily: AppTheme.fontMono,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 4.0,
-                      color: AppTheme.foreground,
-                    ),
-                  ),
-                  const SizedBox(height: 48),
 
                   // SEATING GRID
                   Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        children: _rows.map((row) {
-                          return Row(
+                    child: InteractiveViewer(
+                      minScale: 0.8,
+                      maxScale: 2.0,
+                      boundaryMargin: const EdgeInsets.all(24),
+                      child: Center(
+                        child: SingleChildScrollView(
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(_cols, (colIndex) {
-                              final seatId = '$row${colIndex + 1}';
-                              // Add an aisle space after col 4
-                              if (colIndex == 4) {
-                                return Row(
-                                  children: [
-                                    const SizedBox(width: 24), // Aisle
-                                    SizedBox(
-                                      width: 40,
-                                      height: 40,
-                                      child: _buildSeat(
-                                        seatId,
-                                        bookedSeats,
-                                        heldByOthers,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }
-                              return SizedBox(
-                                width: 40,
-                                height: 40,
-                                child: _buildSeat(
-                                  seatId,
-                                  bookedSeats,
-                                  heldByOthers,
-                                ),
+                            children: _rows.map((row) {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(_cols, (colIndex) {
+                                  final seatId = '$row${colIndex + 1}';
+                                  if (colIndex == 4) {
+                                    return Row(
+                                      children: [
+                                        const SizedBox(width: 24), // Aisle
+                                        _buildSeat(
+                                          seatId,
+                                          bookedSeats,
+                                          heldByOthers,
+                                          seatSize,
+                                        ),
+                                      ],
+                                    );
+                                  }
+                                  return _buildSeat(
+                                    seatId,
+                                    bookedSeats,
+                                    heldByOthers,
+                                    seatSize,
+                                  );
+                                }),
                               );
-                            }),
-                          );
-                        }).toList(),
+                            }).toList(),
+                          ),
+                        ),
                       ),
                     ),
                   ),
 
                   // LEGEND
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24.0),
+                    padding: const EdgeInsets.all(24.0),
                     child: Wrap(
                       spacing: 16,
-                      runSpacing: 8,
+                      runSpacing: 12,
                       alignment: WrapAlignment.center,
                       children: [
-                        _buildLegendItem(
-                          'Available',
-                          AppTheme.background,
-                          AppTheme.foreground,
-                        ),
-                        _buildLegendItem(
-                          'Selected',
-                          AppTheme.foreground,
-                          AppTheme.foreground,
-                        ),
-                        _buildLegendItem(
-                          'Held',
-                          Colors.orange.withValues(alpha: 0.3),
-                          Colors.orange,
-                        ),
+                        _buildLegendItem('Available', AppTheme.surface),
+                        _buildLegendItem('Selected', AppTheme.primary),
                         _buildLegendItem(
                           'Booked',
-                          AppTheme.muted,
-                          AppTheme.mutedForeground,
+                          AppTheme.background,
+                          iconColor: AppTheme.surface,
+                          icon: Icons.close,
                         ),
                       ],
                     ),
@@ -434,12 +442,10 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
       ),
       bottomNavigationBar: SafeArea(
         child: Container(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(16.0),
           decoration: const BoxDecoration(
-            border: Border(
-              top: BorderSide(color: AppTheme.foreground, width: 2),
-            ),
-            color: AppTheme.background,
+            color: AppTheme.surface,
+            border: Border(top: BorderSide(color: AppTheme.borderColor)),
           ),
           child: Row(
             children: [
@@ -448,50 +454,41 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Timer display
                     if (_selectedSeats.isNotEmpty && _remainingSeconds > 0)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.timer,
-                              size: 14,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.timer,
+                            size: 14,
+                            color: _remainingSeconds <= 60
+                                ? AppTheme.error
+                                : AppTheme.foreground,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _formatTimer(_remainingSeconds),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
                               color: _remainingSeconds <= 60
-                                  ? Colors.red
-                                  : Colors.orange,
+                                  ? AppTheme.error
+                                  : AppTheme.foreground,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatTimer(_remainingSeconds),
-                              style: TextStyle(
-                                fontFamily: AppTheme.fontMono,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w900,
-                                color: _remainingSeconds <= 60
-                                    ? Colors.red
-                                    : Colors.orange,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     Text(
-                      '${_selectedSeats.length} SEAT(S)',
+                      '${_selectedSeats.length} Seat(s)',
                       style: const TextStyle(
-                        fontFamily: AppTheme.fontMono,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.0,
+                        fontSize: 14,
                         color: AppTheme.mutedForeground,
                       ),
                     ),
                     Text(
                       '฿${(_selectedSeats.length * widget.showtime.price).toInt()}',
                       style: const TextStyle(
-                        fontFamily: AppTheme.fontDisplay,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
                         color: AppTheme.foreground,
                       ),
                     ),
@@ -509,7 +506,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
                               showtime: widget.showtime,
                               movieTitle: widget.movieTitle,
                               posterPath: widget.posterPath,
-                              selectedSeats: List.from(_selectedSeats),
+                              selectedSeats: List<String>.from(_selectedSeats),
                               totalPrice:
                                   _selectedSeats.length * widget.showtime.price,
                               holdExpiresAt: _holdExpiresAt,
@@ -517,13 +514,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen>
                           ),
                         );
                       },
-                child: const Row(
-                  children: [
-                    Text('CONTINUE'),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward),
-                  ],
-                ),
+                child: const Text('Continue'),
               ),
             ],
           ),

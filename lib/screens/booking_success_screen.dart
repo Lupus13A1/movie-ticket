@@ -24,7 +24,7 @@ class BookingSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppTheme.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -34,107 +34,129 @@ class BookingSuccessScreen extends StatelessWidget {
             children: [
               // SUCCESS ICON
               Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: AppTheme.foreground,
-                  shape: BoxShape.rectangle,
-                  border: Border.all(color: AppTheme.foreground, width: 2),
+                width: 100,
+                height: 100,
+                decoration: const BoxDecoration(
+                  color: AppTheme.primary,
+                  shape: BoxShape.circle,
                 ),
                 child: const Center(
                   child: Icon(
                     Icons.check,
-                    size: 80,
-                    color: AppTheme.background,
+                    size: 60,
+                    color: AppTheme.foreground,
                   ),
                 ),
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 32),
 
               // SUCCESS TEXT
               const Text(
-                'BOOKING CONFIRMED',
+                'Booking Confirmed!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: AppTheme.fontDisplay,
-                  fontSize: 40,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1.0,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
                   color: AppTheme.foreground,
-                  height: 1.1,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
+              Text(
+                'Your tickets are ready.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: AppTheme.mutedForeground),
+              ),
+              const SizedBox(height: 32),
 
               // TICKET DETAILS
               Container(
                 padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
-                  border: Border.all(color: AppTheme.foreground, width: 2),
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
                   children: [
                     Text(
-                      movieTitle.toUpperCase(),
+                      movieTitle,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontFamily: AppTheme.fontMono,
-                        fontSize: 16,
+                        fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.foreground,
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      '${DateFormat('dd MMM yyyy').format(time).toUpperCase()} • ${DateFormat('HH:mm').format(time)}',
+                      '${DateFormat('dd MMM yyyy').format(time)} • ${DateFormat('HH:mm').format(time)}',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontFamily: AppTheme.fontMono,
                         fontSize: 14,
                         color: AppTheme.mutedForeground,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      cinemaName.toUpperCase(),
+                      cinemaName,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontFamily: AppTheme.fontMono,
                         fontSize: 14,
                         color: AppTheme.mutedForeground,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      format.toUpperCase(),
+                      format,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontFamily: AppTheme.fontMono,
                         fontSize: 14,
                         color: AppTheme.mutedForeground,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'SEATS: ${seats.join(', ')}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontFamily: AppTheme.fontMono,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.foreground,
-                      ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                      child: Divider(color: AppTheme.borderColor),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'TOTAL: ฿${totalPrice.toInt()}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontFamily: AppTheme.fontMono,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.foreground,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Seats',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppTheme.mutedForeground,
+                          ),
+                        ),
+                        Text(
+                          seats.join(', '),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.foreground,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total Paid',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppTheme.mutedForeground,
+                          ),
+                        ),
+                        Text(
+                          '฿${totalPrice.toInt()}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.foreground,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -143,45 +165,23 @@ class BookingSuccessScreen extends StatelessWidget {
               const Spacer(),
 
               // BUTTONS
-              SizedBox(
-                height: 64,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (_) => const HomeScreen(initialTabIndex: 1),
-                      ),
-                      (route) => false,
-                    );
-                  },
-                  child: const Text(
-                    'VIEW MY TICKETS',
-                    style: TextStyle(
-                      fontFamily: AppTheme.fontMono,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 2.0,
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (_) => const HomeScreen(initialTabIndex: 1),
                     ),
-                  ),
-                ),
+                    (route) => false,
+                  );
+                },
+                child: const Text('View My Tickets'),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                height: 64,
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  },
-                  child: const Text(
-                    'BACK TO HOME',
-                    style: TextStyle(
-                      fontFamily: AppTheme.fontMono,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 2.0,
-                    ),
-                  ),
-                ),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                child: const Text('Back to Home'),
               ),
             ],
           ),

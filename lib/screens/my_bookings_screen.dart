@@ -30,7 +30,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
       final user = context.read<AuthService>().user;
       if (user == null) {
         setState(() {
-          _errorMessage = 'PLEASE LOGIN TO VIEW BOOKINGS';
+          _errorMessage = 'Please login to view bookings';
           _isLoading = false;
         });
         return;
@@ -48,7 +48,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'FAILED TO LOAD BOOKINGS';
+          _errorMessage = 'Failed to load bookings';
           _isLoading = false;
         });
       }
@@ -60,45 +60,17 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: AppTheme.background,
-          shape: const RoundedRectangleBorder(
-            side: BorderSide(color: AppTheme.foreground, width: 2),
-            borderRadius: BorderRadius.zero,
-          ),
-          title: const Text(
-            'CANCEL BOOKING',
-            style: TextStyle(
-              fontFamily: AppTheme.fontDisplay,
-              color: AppTheme.foreground,
-            ),
-          ),
-          content: const Text(
-            'ARE YOU SURE YOU WANT TO CANCEL THIS BOOKING?',
-            style: TextStyle(
-              fontFamily: AppTheme.fontMono,
-              color: AppTheme.foreground,
-            ),
-          ),
+          backgroundColor: AppTheme.surface,
+          title: const Text('Cancel Booking'),
+          content: const Text('Are you sure you want to cancel this booking?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text(
-                'NO',
-                style: TextStyle(
-                  fontFamily: AppTheme.fontMono,
-                  color: AppTheme.foreground,
-                ),
-              ),
+              child: const Text('No'),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text(
-                'YES',
-                style: TextStyle(
-                  fontFamily: AppTheme.fontMono,
-                  color: Colors.red,
-                ),
-              ),
+              child: const Text('Yes', style: TextStyle(color: AppTheme.error)),
             ),
           ],
         );
@@ -123,30 +95,23 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
         if (mounted) {
           setState(() {
             _isLoading = false;
-            _errorMessage = 'FAILED TO CANCEL BOOKING';
+            _errorMessage = 'Failed to cancel booking';
           });
         }
       }
     }
   }
 
-  Widget _buildSectionHeader(String title, Color color) {
+  Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
-        children: [
-          Container(width: 16, height: 16, color: color),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontFamily: AppTheme.fontDisplay,
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              color: AppTheme.foreground,
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          color: AppTheme.foreground,
+        ),
       ),
     );
   }
@@ -158,43 +123,50 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
     bool isUpcoming = booking.effectiveStatus == BookingStatus.confirmed;
 
     if (isUpcoming) {
-      badgeColor = Colors.green;
-      badgeTextColor = AppTheme.background;
-      badgeText = 'UPCOMING';
+      badgeColor = Colors.green.withOpacity(0.2);
+      badgeTextColor = Colors.green;
+      badgeText = 'Upcoming';
     } else if (booking.effectiveStatus == BookingStatus.completed) {
-      badgeColor = AppTheme.muted;
+      badgeColor = AppTheme.surface;
       badgeTextColor = AppTheme.mutedForeground;
-      badgeText = 'COMPLETED';
+      badgeText = 'Completed';
     } else {
-      badgeColor = Colors.red;
-      badgeTextColor = AppTheme.background;
-      badgeText = 'CANCELLED';
+      badgeColor = AppTheme.error.withOpacity(0.2);
+      badgeTextColor = AppTheme.error;
+      badgeText = 'Cancelled';
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 24.0),
+      margin: const EdgeInsets.only(bottom: 16.0),
       decoration: BoxDecoration(
-        border: Border.all(color: AppTheme.foreground, width: 2),
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // POSTER
-          Container(
-            width: 100,
-            height: 150,
-            decoration: const BoxDecoration(
-              border: Border(
-                right: BorderSide(color: AppTheme.foreground, width: 2),
-              ),
-              color: AppTheme.muted,
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(8),
+              bottomLeft: Radius.circular(8),
             ),
-            child: booking.posterPath.isNotEmpty
-                ? Image.network(
-                    '${Constants.tmdbImageBaseUrl}${booking.posterPath}',
-                    fit: BoxFit.cover,
-                  )
-                : const Icon(Icons.movie, color: AppTheme.mutedForeground),
+            child: SizedBox(
+              width: 100,
+              height: 150,
+              child: booking.posterPath.isNotEmpty
+                  ? Image.network(
+                      '${Constants.tmdbImageBaseUrl}${booking.posterPath}',
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      color: AppTheme.background,
+                      child: const Icon(
+                        Icons.movie,
+                        color: AppTheme.mutedForeground,
+                      ),
+                    ),
+            ),
           ),
 
           // DETAILS
@@ -205,33 +177,28 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    booking.movieTitle.toUpperCase(),
-                    maxLines: 1,
+                    booking.movieTitle,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontFamily: AppTheme.fontDisplay,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
                       color: AppTheme.foreground,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${DateFormat('dd MMM yyyy').format(booking.time).toUpperCase()} • ${DateFormat('HH:mm').format(booking.time)}',
+                    '${DateFormat('dd MMM yyyy').format(booking.time)} • ${DateFormat('HH:mm').format(booking.time)}',
                     style: const TextStyle(
-                      fontFamily: AppTheme.fontMono,
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
                       color: AppTheme.mutedForeground,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    booking.cinemaName.toUpperCase(),
+                    booking.cinemaName,
                     style: const TextStyle(
-                      fontFamily: AppTheme.fontMono,
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
                       color: AppTheme.mutedForeground,
                     ),
                   ),
@@ -241,11 +208,10 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          'SEATS: ${booking.seats.join(', ')}',
+                          'Seats: ${booking.seats.join(', ')}',
                           style: const TextStyle(
-                            fontFamily: AppTheme.fontMono,
                             fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                             color: AppTheme.foreground,
                           ),
                         ),
@@ -255,13 +221,15 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                           horizontal: 8,
                           vertical: 4,
                         ),
-                        color: badgeColor,
+                        decoration: BoxDecoration(
+                          color: badgeColor,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                         child: Text(
                           badgeText,
                           style: TextStyle(
-                            fontFamily: AppTheme.fontMono,
                             fontSize: 10,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                             color: badgeTextColor,
                           ),
                         ),
@@ -269,18 +237,17 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                     ],
                   ),
                   if (isUpcoming) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Align(
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
                         onTap: () => _cancelBooking(booking),
                         child: const Text(
-                          'CANCEL',
+                          'Cancel Booking',
                           style: TextStyle(
-                            fontFamily: AppTheme.fontMono,
                             fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.red,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.error,
                           ),
                         ),
                       ),
@@ -299,7 +266,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(color: AppTheme.foreground),
+        child: CircularProgressIndicator(color: AppTheme.primary),
       );
     }
 
@@ -307,10 +274,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
       return Center(
         child: Text(
           _errorMessage!,
-          style: const TextStyle(
-            fontFamily: AppTheme.fontMono,
-            color: AppTheme.foreground,
-          ),
+          style: const TextStyle(color: AppTheme.foreground),
         ),
       );
     }
@@ -318,12 +282,8 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
     if (_bookings == null || _bookings!.isEmpty) {
       return const Center(
         child: Text(
-          'NO BOOKINGS YET',
-          style: TextStyle(
-            fontFamily: AppTheme.fontMono,
-            fontSize: 16,
-            color: AppTheme.mutedForeground,
-          ),
+          'No tickets booked yet.',
+          style: TextStyle(fontSize: 16, color: AppTheme.mutedForeground),
         ),
       );
     }
@@ -344,26 +304,32 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
 
     final listItems = <Widget>[];
 
+    // Extra padding at top for transparent appbar if used in bottom nav
+    listItems.add(const SizedBox(height: 48));
+
     if (upcoming.isNotEmpty) {
-      listItems.add(_buildSectionHeader('UPCOMING', Colors.green));
+      listItems.add(_buildSectionHeader('Upcoming Showtimes'));
       listItems.addAll(upcoming.map((b) => _buildBookingCard(b)));
     }
 
     if (completed.isNotEmpty) {
-      listItems.add(_buildSectionHeader('COMPLETED', AppTheme.muted));
+      listItems.add(_buildSectionHeader('Past Showtimes'));
       listItems.addAll(completed.map((b) => _buildBookingCard(b)));
     }
 
     if (cancelled.isNotEmpty) {
-      listItems.add(_buildSectionHeader('CANCELLED', Colors.red));
+      listItems.add(_buildSectionHeader('Cancelled'));
       listItems.addAll(cancelled.map((b) => _buildBookingCard(b)));
     }
 
     return RefreshIndicator(
       onRefresh: _fetchBookings,
-      color: AppTheme.background,
-      backgroundColor: Colors.transparent,
-      child: ListView(padding: const EdgeInsets.all(24.0), children: listItems),
+      color: AppTheme.primary,
+      backgroundColor: AppTheme.surface,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        children: listItems,
+      ),
     );
   }
 }
