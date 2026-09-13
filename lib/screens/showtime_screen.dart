@@ -94,7 +94,7 @@ class _ShowtimeScreenState extends State<ShowtimeScreen> {
     final groupedShowtimes = _groupShowtimesByCinema(dailyShowtimes);
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(widget.movieTitle.toUpperCase()),
         bottom: PreferredSize(

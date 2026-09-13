@@ -198,7 +198,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
     return RefreshIndicator(
       onRefresh: _fetchBookings,
       color: AppTheme.background,
-      backgroundColor: AppTheme.foreground,
+      backgroundColor: Colors.transparent,
       child: ListView.builder(
         padding: const EdgeInsets.all(24.0),
         itemCount: _bookings!.length,

@@ -71,30 +71,45 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(
+    String title, {
+    Color accentColor = AppTheme.primaryRed,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            title.toUpperCase(),
-            style: const TextStyle(
-              fontFamily: AppTheme.fontDisplay,
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-              color: AppTheme.foreground,
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: accentColor,
+              border: AppTheme.border2,
+              boxShadow: const [AppTheme.hardShadow],
             ),
           ),
-          const SizedBox(height: 8),
-          Container(height: 4, width: 48, color: AppTheme.foreground),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Semantics(
+              header: true,
+              child: Text(
+                title.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                  color: AppTheme.foreground,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildMovieCard(Movie movie) {
+  Widget _buildMovieCard(Movie movie, int index) {
     // Get up to 2 genres
     final genreNames = movie.genreIds
         .take(2)
@@ -102,11 +117,14 @@ class _HomeScreenState extends State<HomeScreen> {
         .where((name) => name.isNotEmpty)
         .toList();
 
+    final primaryColor =
+        AppTheme.primaryColors[index % AppTheme.primaryColors.length];
+
     return GestureDetector(
       onTap: () => _navigateToDetail(movie.id),
       child: Container(
         width: 150,
-        margin: const EdgeInsets.only(left: 24.0),
+        margin: const EdgeInsets.only(left: 24.0, bottom: 8.0, right: 8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -114,9 +132,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               height: 225,
               width: 150,
-              decoration: BoxDecoration(
-                border: Border.all(color: AppTheme.foreground, width: 2),
-                color: AppTheme.muted,
+              decoration: AppTheme.cardDecoration(
+                color: primaryColor,
+                thickBorder: true,
               ),
               child: movie.posterPath.isNotEmpty
                   ? Image.network(
@@ -126,14 +144,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           const Center(
                             child: Icon(
                               Icons.broken_image,
-                              color: AppTheme.mutedForeground,
+                              color: AppTheme.foreground,
                             ),
                           ),
                     )
                   : const Center(
                       child: Icon(
                         Icons.movie_outlined,
-                        color: AppTheme.mutedForeground,
+                        color: AppTheme.foreground,
                       ),
                     ),
             ),
@@ -144,9 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontFamily: AppTheme.fontBody,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
                 color: AppTheme.foreground,
                 height: 1.2,
               ),
@@ -157,28 +174,35 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Text(
-                    genreNames.join(', ').toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: AppTheme.fontMono,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.5,
-                      color: AppTheme.mutedForeground,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
+                    color: AppTheme.foreground,
+                    child: Text(
+                      genreNames.join(', ').toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: AppTheme.fontMono,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                        color: AppTheme.background,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 4),
-                const Icon(Icons.star, size: 12, color: AppTheme.foreground),
+                const SizedBox(width: 8),
+                const Icon(Icons.star, size: 14, color: AppTheme.foreground),
                 const SizedBox(width: 2),
                 Text(
                   movie.voteAverage.toStringAsFixed(1),
                   style: const TextStyle(
                     fontFamily: AppTheme.fontMono,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
                     color: AppTheme.foreground,
                   ),
                 ),
@@ -203,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     return SizedBox(
-      height: 310,
+      height: 330, // Increased to accommodate shadows
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -214,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: EdgeInsets.only(
               right: index == movies.length - 1 ? 24.0 : 0,
             ),
-            child: _buildMovieCard(movie),
+            child: _buildMovieCard(movie, index),
           );
         },
       ),
@@ -228,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final heroMovies = _popular!.take(5).toList();
 
     return SizedBox(
-      height: 580,
+      height: 620, // Increased height to fit oversized elements and shadows
       child: PageView.builder(
         physics: const BouncingScrollPhysics(),
         itemCount: heroMovies.length,
@@ -239,9 +263,13 @@ class _HomeScreenState extends State<HomeScreen> {
               .where((name) => name.isNotEmpty)
               .toList();
 
+          final accentColor =
+              AppTheme.primaryColors[index % AppTheme.primaryColors.length];
+
           return GestureDetector(
             onTap: () => _navigateToDetail(movie.id),
-            child: Padding(
+            child: Container(
+              color: AppTheme.background,
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,32 +277,37 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Highlight Tag
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                      horizontal: 12,
+                      vertical: 6,
                     ),
                     color: AppTheme.foreground,
-                    child: const Text(
-                      'FEATURED',
-                      style: TextStyle(
-                        fontFamily: AppTheme.fontMono,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.background,
-                        letterSpacing: 2.0,
+                    child: Semantics(
+                      header: true,
+                      child: const Text(
+                        'FEATURED',
+                        style: TextStyle(
+                          fontFamily: AppTheme.fontMono,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.background,
+                          letterSpacing: 3.0,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Big Poster
+                  // Big Poster with Bauhaus Card Decoration
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: AppTheme.foreground,
-                          width: 2,
-                        ),
-                        color: AppTheme.muted,
+                      margin: const EdgeInsets.only(
+                        bottom: 8.0,
+                        right: 8.0,
+                      ), // space for shadow
+                      decoration: AppTheme.cardDecoration(
+                        color: accentColor,
+                        thickBorder: true,
+                        largeShadow: true,
                       ),
                       child: movie.posterPath.isNotEmpty
                           ? Image.network(
@@ -286,31 +319,38 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Icon(
                                 Icons.movie_outlined,
                                 size: 48,
-                                color: AppTheme.mutedForeground,
+                                color: AppTheme.foreground,
                               ),
                             ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   // Title
                   Text(
                     movie.title.toUpperCase(),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontFamily: AppTheme.fontDisplay,
-                      fontSize: 36,
+                      fontSize: 48,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: -1.0,
+                      letterSpacing: -1.5,
                       color: AppTheme.foreground,
-                      height: 1.1,
+                      height: 0.95,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  // Genres & Rating
+                  const SizedBox(height: 12),
+                  // Genres & Rating as geometric blocks
                   Row(
                     children: [
-                      Expanded(
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: accentColor,
+                          border: AppTheme.border2,
+                        ),
                         child: Text(
                           genreNames.join(' • ').toUpperCase(),
                           maxLines: 1,
@@ -318,38 +358,50 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: const TextStyle(
                             fontFamily: AppTheme.fontMono,
                             fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w800,
                             color: AppTheme.foreground,
                           ),
                         ),
                       ),
-                      const Icon(
-                        Icons.star,
-                        size: 14,
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         color: AppTheme.foreground,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        movie.voteAverage.toStringAsFixed(1),
-                        style: const TextStyle(
-                          fontFamily: AppTheme.fontMono,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.foreground,
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              size: 14,
+                              color: AppTheme.primaryYellow,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              movie.voteAverage.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontFamily: AppTheme.fontMono,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                                color: AppTheme.background,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   // Overview
                   Text(
                     movie.overview,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontFamily: AppTheme.fontBody,
-                      fontSize: 14,
-                      color: AppTheme.mutedForeground,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.foreground,
                       height: 1.5,
                     ),
                   ),
@@ -427,6 +479,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.search, size: 28),
+            tooltip: 'Search movies',
             onPressed: () {
               // Navigate to search screen
             },

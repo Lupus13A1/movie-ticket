@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 
@@ -53,7 +52,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               'PROFILE UPDATED SUCCESSFULLY',
               style: TextStyle(fontFamily: AppTheme.fontMono),
             ),
-            backgroundColor: AppTheme.foreground,
+            backgroundColor: Colors.transparent,
           ),
         );
         Navigator.pop(context);
@@ -76,9 +75,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('EDIT PROFILE'),
+        leading: Semantics(
+          label: 'Navigate back',
+          button: true,
+          child: const BackButton(),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(2.0),
           child: Container(color: AppTheme.foreground, height: 2.0),
@@ -89,20 +93,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'DISPLAY NAME',
-              style: TextStyle(
-                fontFamily: AppTheme.fontMono,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 2.0,
-                color: AppTheme.foreground,
-              ),
-            ),
-            const SizedBox(height: 8),
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(hintText: 'ENTER YOUR NAME'),
+              decoration: const InputDecoration(
+                labelText: 'DISPLAY NAME',
+                hintText: 'ENTER YOUR NAME',
+                filled: true,
+                fillColor: AppTheme.muted,
+              ),
               style: const TextStyle(
                 fontFamily: AppTheme.fontBody,
                 fontSize: 16,

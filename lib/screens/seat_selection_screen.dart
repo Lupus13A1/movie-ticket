@@ -113,7 +113,7 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('SELECT SEATS'),
         bottom: PreferredSize(

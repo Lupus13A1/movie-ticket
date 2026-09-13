@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/glass_container.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -100,7 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final isSmall = screenHeight < 700;
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -229,141 +230,140 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ],
 
                   // ── Form ────────────────────────────────────────
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Email
-                        const Text(
-                          'EMAIL ADDRESS',
-                          style: TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 3.0,
-                            color: AppTheme.foreground,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          style: const TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 16,
-                            color: AppTheme.foreground,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: 'your@email.com',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Email is required';
-                            }
-                            if (!value.contains('@')) {
-                              return 'Enter a valid email';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 28),
-
-                        // Password
-                        const Text(
-                          'PASSWORD',
-                          style: TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 3.0,
-                            color: AppTheme.foreground,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          style: const TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 16,
-                            color: AppTheme.foreground,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: '••••••••',
-                            suffixIcon: GestureDetector(
-                              onTap: () {
-                                setState(
-                                    () => _obscurePassword = !_obscurePassword);
-                              },
-                              child: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: AppTheme.mutedForeground,
-                                size: 20,
-                              ),
+                  GlassContainer(
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Email
+                          const Text(
+                            'EMAIL ADDRESS',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 3.0,
+                              color: AppTheme.secondary,
                             ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Password is required';
-                            }
-                            if (value.length < 6) {
-                              return 'At least 6 characters';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 28),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: AppTheme.foreground,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'your@email.com',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Email is required';
+                              }
+                              if (!value.contains('@')) {
+                                return 'Enter a valid email';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 28),
 
-                        // Confirm Password
-                        const Text(
-                          'CONFIRM PASSWORD',
-                          style: TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 3.0,
-                            color: AppTheme.foreground,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _confirmPasswordController,
-                          obscureText: _obscureConfirm,
-                          style: const TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 16,
-                            color: AppTheme.foreground,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: '••••••••',
-                            suffixIcon: GestureDetector(
-                              onTap: () {
-                                setState(
-                                    () => _obscureConfirm = !_obscureConfirm);
-                              },
-                              child: Icon(
-                                _obscureConfirm
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: AppTheme.mutedForeground,
-                                size: 20,
-                              ),
+                          // Password
+                          const Text(
+                            'PASSWORD',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 3.0,
+                              color: AppTheme.secondary,
                             ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please confirm your password';
-                            }
-                            if (value != _passwordController.text) {
-                              return 'Passwords do not match';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: AppTheme.foreground,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: '••••••••',
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  );
+                                },
+                                child: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: AppTheme.mutedForeground,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Password is required';
+                              }
+                              if (value.length < 6) {
+                                return 'At least 6 characters';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 28),
+
+                          // Confirm Password
+                          const Text(
+                            'CONFIRM PASSWORD',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 3.0,
+                              color: AppTheme.secondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _confirmPasswordController,
+                            obscureText: _obscureConfirm,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: AppTheme.foreground,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: '••••••••',
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  setState(
+                                    () => _obscureConfirm = !_obscureConfirm,
+                                  );
+                                },
+                                child: Icon(
+                                  _obscureConfirm
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: AppTheme.mutedForeground,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please confirm your password';
+                              }
+                              if (value != _passwordController.text) {
+                                return 'Passwords do not match';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
@@ -426,8 +426,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(
                     height: 56,
                     child: OutlinedButton(
-                      onPressed:
-                          _isGoogleLoading ? null : _handleGoogleSignIn,
+                      onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
                       child: _isGoogleLoading
                           ? const SizedBox(
                               width: 20,

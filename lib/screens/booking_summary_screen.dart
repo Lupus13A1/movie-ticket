@@ -5,7 +5,6 @@ import '../models/showtime.dart';
 import '../services/auth_service.dart';
 import '../services/firebase_service.dart';
 import '../theme/app_theme.dart';
-import '../constants.dart';
 import 'booking_success_screen.dart';
 
 class BookingSummaryScreen extends StatefulWidget {
@@ -76,7 +75,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
               'BOOKING FAILED: ${e.toString()}',
               style: const TextStyle(fontFamily: AppTheme.fontMono),
             ),
-            backgroundColor: AppTheme.foreground,
+            backgroundColor: Colors.transparent,
           ),
         );
       }
@@ -121,7 +120,7 @@ class _BookingSummaryScreenState extends State<BookingSummaryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('SUMMARY'),
         bottom: PreferredSize(

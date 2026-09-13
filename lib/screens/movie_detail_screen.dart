@@ -93,6 +93,11 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
       backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text('MOVIE DETAIL'),
+        leading: Semantics(
+          label: 'Navigate back',
+          button: true,
+          child: const BackButton(),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(2.0),
           child: Container(color: AppTheme.foreground, height: 2.0),
@@ -105,13 +110,18 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
             // IMAGE SECTION
             if (backdropPath != null || posterPath != null)
               Container(
+                margin: const EdgeInsets.fromLTRB(
+                  24,
+                  24,
+                  24,
+                  8,
+                ), // Padding around to show shadow
                 height: 300,
                 width: double.infinity,
-                decoration: BoxDecoration(
-                  border: const Border(
-                    bottom: BorderSide(color: AppTheme.foreground, width: 4),
-                  ),
-                  color: AppTheme.muted,
+                decoration: AppTheme.cardDecoration(
+                  color: AppTheme.primaryRed,
+                  thickBorder: true,
+                  largeShadow: true,
                 ),
                 child: Image.network(
                   '${Constants.tmdbImageBaseUrl}${backdropPath ?? posterPath}',
@@ -121,7 +131,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     child: Icon(
                       Icons.broken_image,
                       size: 64,
-                      color: AppTheme.mutedForeground,
+                      color: AppTheme.foreground,
                     ),
                   ),
                 ),
@@ -134,14 +144,21 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                 children: [
                   // GENRES
                   if (genres.isNotEmpty)
-                    Text(
-                      genres.join(' • ').toUpperCase(),
-                      style: const TextStyle(
-                        fontFamily: AppTheme.fontMono,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 2.0,
-                        color: AppTheme.mutedForeground,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      color: AppTheme.foreground,
+                      child: Text(
+                        genres.join(' • ').toUpperCase(),
+                        style: const TextStyle(
+                          fontFamily: AppTheme.fontMono,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 2.0,
+                          color: AppTheme.background,
+                        ),
                       ),
                     ),
                   const SizedBox(height: 16),
@@ -150,8 +167,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   Text(
                     title.toUpperCase(),
                     style: const TextStyle(
-                      fontFamily: AppTheme.fontDisplay,
-                      fontSize: 48,
+                      fontSize: 56,
                       fontWeight: FontWeight.w900,
                       height: 0.95,
                       letterSpacing: -1.5,
@@ -167,29 +183,26 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical: 8,
+                          vertical: 12,
                         ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.foreground,
-                          border: Border.all(
-                            color: AppTheme.foreground,
-                            width: 2,
-                          ),
+                        decoration: AppTheme.cardDecoration(
+                          color: AppTheme.primaryBlue,
+                          thickBorder: true,
                         ),
                         child: Row(
                           children: [
                             const Icon(
                               Icons.star,
                               color: AppTheme.background,
-                              size: 18,
+                              size: 20,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               voteAverage.toStringAsFixed(1),
                               style: const TextStyle(
                                 fontFamily: AppTheme.fontMono,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
                                 color: AppTheme.background,
                               ),
                             ),
@@ -201,28 +214,26 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical: 8,
+                          vertical: 12,
                         ),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: AppTheme.foreground,
-                            width: 2,
-                          ),
+                        decoration: AppTheme.cardDecoration(
+                          color: AppTheme.primaryYellow,
+                          thickBorder: true,
                         ),
                         child: Row(
                           children: [
                             const Icon(
                               Icons.schedule,
                               color: AppTheme.foreground,
-                              size: 18,
+                              size: 20,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               '$runtime MIN',
                               style: const TextStyle(
                                 fontFamily: AppTheme.fontMono,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
                                 color: AppTheme.foreground,
                               ),
                             ),
@@ -241,18 +252,20 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                       border: Border(
                         bottom: BorderSide(
                           color: AppTheme.foreground,
-                          width: 2,
+                          width: 4,
                         ),
                       ),
                     ),
-                    child: const Text(
-                      'THE STORY',
-                      style: TextStyle(
-                        fontFamily: AppTheme.fontBody,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 2.0,
-                        color: AppTheme.foreground,
+                    child: Semantics(
+                      header: true,
+                      child: const Text(
+                        'THE STORY',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.0,
+                          color: AppTheme.foreground,
+                        ),
                       ),
                     ),
                   ),
@@ -262,9 +275,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   Text(
                     overview,
                     style: const TextStyle(
-                      fontFamily: AppTheme.fontBody,
                       fontSize: 18,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w600,
                       height: 1.6,
                       color: AppTheme.foreground,
                     ),
@@ -278,22 +290,32 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: SizedBox(
-            height: 64,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ShowtimeScreen(
-                      movieId: widget.movieId,
-                      movieTitle: title,
-                      posterPath: posterPath ?? '',
-                    ),
+          padding: const EdgeInsets.fromLTRB(
+            24,
+            8,
+            32,
+            32,
+          ), // Padding for shadow
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ShowtimeScreen(
+                    movieId: widget.movieId,
+                    movieTitle: title,
+                    posterPath: posterPath ?? '',
                   ),
-                );
-              },
+                ),
+              );
+            },
+            child: Container(
+              height: 64,
+              decoration: AppTheme.cardDecoration(
+                color: AppTheme.primaryRed,
+                thickBorder: true,
+                largeShadow: true,
+              ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -301,13 +323,18 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     'BOOK TICKETS',
                     style: TextStyle(
                       fontFamily: AppTheme.fontMono,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 2.0,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 3.0,
+                      color: AppTheme.background,
                     ),
                   ),
                   SizedBox(width: 12),
-                  Icon(Icons.arrow_forward),
+                  Icon(
+                    Icons.arrow_forward,
+                    color: AppTheme.background,
+                    size: 24,
+                  ),
                 ],
               ),
             ),
