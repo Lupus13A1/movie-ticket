@@ -4,6 +4,7 @@ import '../models/movie.dart';
 import '../services/tmdb_service.dart';
 import '../theme/app_theme.dart';
 import '../constants.dart';
+import '../l10n/app_translations.dart';
 import 'movie_detail_screen.dart';
 import 'profile_screen.dart';
 import 'my_bookings_screen.dart';
@@ -123,14 +124,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildMovieList(List<Movie>? movies) {
+  Widget _buildMovieList(List<Movie>? movies, String Function(String) tr) {
     if (movies == null || movies.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 165,
         child: Center(
           child: Text(
-            'No movies available',
-            style: TextStyle(color: AppTheme.mutedForeground),
+            tr('home.noMovies'),
+            style: const TextStyle(color: AppTheme.mutedForeground),
           ),
         ),
       );
@@ -149,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHeroSection() {
+  Widget _buildHeroSection(String Function(String) tr) {
     if (_popular == null || _popular!.isEmpty) return const SizedBox.shrink();
 
     final movie = _popular!.first; // Show the top popular movie
@@ -229,13 +230,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         Icons.play_arrow,
                         color: AppTheme.background,
                       ),
-                      label: const Text(
-                        'Book Now',
-                        style: TextStyle(color: AppTheme.background),
+                      label: Text(
+                        tr('home.bookNow'),
+                        style: const TextStyle(color: AppTheme.background),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme
-                            .foreground, // White button like Netflix Play
+                        backgroundColor: AppTheme.foreground,
                         foregroundColor: AppTheme.background,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 24,
@@ -250,13 +250,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         Icons.info_outline,
                         color: AppTheme.foreground,
                       ),
-                      label: const Text(
-                        'Details',
-                        style: TextStyle(color: AppTheme.foreground),
+                      label: Text(
+                        tr('home.details'),
+                        style: const TextStyle(color: AppTheme.foreground),
                       ),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.transparent),
-                        backgroundColor: AppTheme.surface.withOpacity(0.5),
+                        backgroundColor: AppTheme.surface.withValues(
+                          alpha: 0.5,
+                        ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 24,
                           vertical: 12,
@@ -273,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHomeContent() {
+  Widget _buildHomeContent(String Function(String) tr) {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: AppTheme.primary),
@@ -301,16 +303,16 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeroSection(),
+            _buildHeroSection(tr),
             const SizedBox(height: 16),
-            _buildSectionHeader('Now Playing'),
-            _buildMovieList(_nowPlaying),
+            _buildSectionHeader(tr('home.nowPlaying')),
+            _buildMovieList(_nowPlaying, tr),
             const SizedBox(height: 24),
-            _buildSectionHeader('Popular on Cinema'),
-            _buildMovieList(_popular),
+            _buildSectionHeader(tr('home.popularOnCinema')),
+            _buildMovieList(_popular, tr),
             const SizedBox(height: 24),
-            _buildSectionHeader('Coming Soon'),
-            _buildMovieList(_upcoming),
+            _buildSectionHeader(tr('home.comingSoon')),
+            _buildMovieList(_upcoming, tr),
             const SizedBox(height: 48), // Padding at bottom
           ],
         ),
@@ -320,9 +322,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final tr = AppTranslations.of(context);
+
     return Scaffold(
-      extendBodyBehindAppBar:
-          true, // Netflix style transparent app bar over hero
+      extendBodyBehindAppBar: true,
       appBar: _currentIndex == 0
           ? AppBar(
               backgroundColor: Colors.transparent,
@@ -364,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          _buildHomeContent(),
+          _buildHomeContent(tr),
           MyBookingsScreen(key: ValueKey(_bookingsRefreshKey)),
           const ProfileScreen(),
         ],
@@ -377,21 +380,21 @@ class _HomeScreenState extends State<HomeScreen> {
             if (index == 1) _bookingsRefreshKey++;
           });
         },
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: tr('nav.home'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.local_activity_outlined),
-            activeIcon: Icon(Icons.local_activity),
-            label: 'Tickets',
+            icon: const Icon(Icons.local_activity_outlined),
+            activeIcon: const Icon(Icons.local_activity),
+            label: tr('nav.tickets'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
-            activeIcon: Icon(Icons.menu),
-            label: 'More',
+            icon: const Icon(Icons.menu),
+            activeIcon: const Icon(Icons.menu),
+            label: tr('nav.more'),
           ),
         ],
       ),

@@ -331,4 +331,47 @@ class FirebaseService {
       }
     }
   }
+  // ──────────────────────────────────────────────
+  // USER SETTINGS
+  // ──────────────────────────────────────────────
+
+  /// Save notification preferences to Firebase.
+  Future<void> saveNotificationSettings(
+    String userId,
+    Map<String, dynamic> settings,
+  ) async {
+    await _db.ref('userSettings/$userId/notifications').update(settings);
+  }
+
+  /// Load notification preferences from Firebase.
+  Future<Map<String, dynamic>?> getNotificationSettings(String userId) async {
+    final ref = _db.ref('userSettings/$userId/notifications');
+    final snapshot = await ref.get();
+
+    if (snapshot.exists) {
+      final data = snapshot.value as Map<dynamic, dynamic>;
+      return data.map((key, value) => MapEntry(key.toString(), value));
+    }
+    return null;
+  }
+
+  /// Save user preferences (e.g. language) to Firebase.
+  Future<void> saveUserPreferences(
+    String userId,
+    Map<String, dynamic> preferences,
+  ) async {
+    await _db.ref('userSettings/$userId/preferences').update(preferences);
+  }
+
+  /// Load user preferences from Firebase.
+  Future<Map<String, dynamic>?> getUserPreferences(String userId) async {
+    final ref = _db.ref('userSettings/$userId/preferences');
+    final snapshot = await ref.get();
+
+    if (snapshot.exists) {
+      final data = snapshot.value as Map<dynamic, dynamic>;
+      return data.map((key, value) => MapEntry(key.toString(), value));
+    }
+    return null;
+  }
 }

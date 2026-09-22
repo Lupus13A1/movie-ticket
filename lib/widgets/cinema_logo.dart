@@ -36,7 +36,7 @@ class CinemaLogo extends StatelessWidget {
           const SizedBox(height: 16),
           // Main text
           const Text(
-            'CINEMA',
+            'STARPLEX',
             style: TextStyle(
               fontSize: 48,
               fontWeight: FontWeight.w900,

@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_translations.dart';
 import 'login_screen.dart';
 import 'edit_profile_screen.dart';
+import 'app_settings_screen.dart';
+import 'notifications_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -12,6 +15,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authService = context.watch<AuthService>();
     final user = authService.user;
+    final tr = AppTranslations.of(context);
 
     // Use Dicebear for avatar
     final seed = user?.email ?? 'CinemaUser';
@@ -84,7 +88,7 @@ class ProfileScreen extends StatelessWidget {
             // MENU LIST
             _buildMenuTile(
               icon: Icons.edit_outlined,
-              title: 'Manage Profiles',
+              title: tr('profile.manageProfiles'),
               onTap: () {
                 Navigator.push(
                   context,
@@ -96,30 +100,40 @@ class ProfileScreen extends StatelessWidget {
             ),
             _buildMenuTile(
               icon: Icons.credit_card_outlined,
-              title: 'Payment Details',
+              title: tr('profile.paymentDetails'),
               onTap: () {
-                _showComingSoon(context);
+                _showComingSoon(context, tr);
               },
             ),
             _buildMenuTile(
               icon: Icons.notifications_none,
-              title: 'Notifications',
+              title: tr('profile.notifications'),
               onTap: () {
-                _showComingSoon(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationsScreen(),
+                  ),
+                );
               },
             ),
             _buildMenuTile(
               icon: Icons.settings_outlined,
-              title: 'App Settings',
+              title: tr('profile.appSettings'),
               onTap: () {
-                _showComingSoon(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AppSettingsScreen(),
+                  ),
+                );
               },
             ),
             _buildMenuTile(
               icon: Icons.help_outline,
-              title: 'Help',
+              title: tr('profile.help'),
               onTap: () {
-                _showComingSoon(context);
+                _showComingSoon(context, tr);
               },
             ),
 
@@ -141,9 +155,9 @@ class ProfileScreen extends StatelessWidget {
                       );
                     }
                   },
-                  child: const Text(
-                    'Sign Out',
-                    style: TextStyle(
+                  child: Text(
+                    tr('profile.signOut'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.mutedForeground,
@@ -159,11 +173,11 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showComingSoon(BuildContext context) {
+  void _showComingSoon(BuildContext context, String Function(String) tr) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Coming Soon'),
-        duration: Duration(seconds: 1),
+      SnackBar(
+        content: Text(tr('profile.comingSoon')),
+        duration: const Duration(seconds: 1),
       ),
     );
   }
