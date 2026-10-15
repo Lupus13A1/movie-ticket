@@ -15,12 +15,18 @@ class AuthService extends ChangeNotifier {
     });
   }
 
-  Future<void> register(String email, String password) async {
+  Future<void> register(String email, String password, String name) async {
     try {
-      await _auth.createUserWithEmailAndPassword(
+      final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      if (userCredential.user != null) {
+        await userCredential.user!.updateDisplayName(name);
+        await userCredential.user!.reload();
+        _user = _auth.currentUser;
+        notifyListeners();
+      }
     } catch (e) {
       rethrow;
     }
@@ -38,6 +44,8 @@ class AuthService extends ChangeNotifier {
     try {
       if (kIsWeb) {
         final googleProvider = GoogleAuthProvider();
+        // Force the account selection dialog to appear every time
+        googleProvider.setCustomParameters({'prompt': 'select_account'});
         await _auth.signInWithPopup(googleProvider);
       } else {
         throw Exception('Google Sign-In is only supported on web.');

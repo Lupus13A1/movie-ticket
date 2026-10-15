@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/cinema_logo.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -104,125 +105,59 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isSmall = screenHeight < 700;
-
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
+              constraints: const BoxConstraints(maxWidth: 400),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: isSmall ? 32 : 64),
-
-                  // ── Hero Typography ─────────────────────────────
-                  Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          'CINEMA',
-                          style: TextStyle(
-                            fontFamily: AppTheme.fontDisplay,
-                            fontSize: isSmall ? 64 : 88,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -3.0,
-                            height: 0.85,
-                            color: AppTheme.foreground,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 12),
-                        // Thick decorative rule
-                        Container(
-                          width: 60,
-                          height: 4,
-                          color: AppTheme.foreground,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'MOVIE TICKETS',
-                          style: TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 6.0,
-                            color: AppTheme.mutedForeground,
-                          ),
-                        ),
-                      ],
+                  const CinemaLogo(),
+                  const SizedBox(height: 32),
+                  const Text(
+                    'Sign In',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.foreground,
                     ),
+                    textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 32),
 
-                  SizedBox(height: isSmall ? 40 : 64),
-
-                  // ── Error Message ───────────────────────────────
                   if (_errorMessage != null) ...[
                     Container(
-                      width: double.infinity,
                       padding: const EdgeInsets.all(16),
-                      decoration: const BoxDecoration(
-                        color: AppTheme.foreground,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryDark.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: AppTheme.primaryDark),
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.error_outline,
-                            color: AppTheme.background,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              _errorMessage!,
-                              style: const TextStyle(
-                                fontFamily: AppTheme.fontBody,
-                                fontSize: 13,
-                                color: AppTheme.background,
-                                height: 1.4,
-                              ),
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(
+                          color: AppTheme.foreground,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
                   ],
 
-                  // ── Form ────────────────────────────────────────
                   Form(
                     key: _formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Email label
-                        const Text(
-                          'EMAIL ADDRESS',
-                          style: TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 3.0,
-                            color: AppTheme.foreground,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          style: const TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 16,
-                            color: AppTheme.foreground,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: 'your@email.com',
-                          ),
+                          decoration: const InputDecoration(labelText: 'Email'),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'Email is required';
@@ -233,43 +168,24 @@ class _LoginScreenState extends State<LoginScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 32),
-
-                        // Password label
-                        const Text(
-                          'PASSWORD',
-                          style: TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 3.0,
-                            color: AppTheme.foreground,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 16),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
-                          style: const TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 16,
-                            color: AppTheme.foreground,
-                          ),
                           decoration: InputDecoration(
-                            hintText: '••••••••',
-                            suffixIcon: GestureDetector(
-                              onTap: () {
+                            labelText: 'Password',
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: AppTheme.mutedForeground,
+                              ),
+                              onPressed: () {
                                 setState(() {
                                   _obscurePassword = !_obscurePassword;
                                 });
                               },
-                              child: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: AppTheme.mutedForeground,
-                                size: 20,
-                              ),
                             ),
                           ),
                           validator: (value) {
@@ -279,146 +195,66 @@ class _LoginScreenState extends State<LoginScreen> {
                             return null;
                           },
                         ),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _handleLogin,
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppTheme.foreground,
+                                    ),
+                                  )
+                                : const Text('Sign In'),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 48,
+                          child: OutlinedButton(
+                            onPressed: _isGoogleLoading
+                                ? null
+                                : _handleGoogleSignIn,
+                            child: _isGoogleLoading
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppTheme.foreground,
+                                    ),
+                                  )
+                                : const Text('Sign In with Google'),
+                          ),
+                        ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 40),
-
-                  // ── Sign In Button ──────────────────────────────
-                  SizedBox(
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 1.5,
-                                color: AppTheme.background,
-                              ),
-                            )
-                          : const Text('SIGN IN  →'),
-                    ),
-                  ),
-
                   const SizedBox(height: 32),
-
-                  // ── Divider with "or" ───────────────────────────
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: AppTheme.borderLight,
-                        ),
+                      const Text(
+                        'New to Cinema? ',
+                        style: TextStyle(color: AppTheme.mutedForeground),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Text(
-                          'OR',
+                      GestureDetector(
+                        onTap: _navigateToRegister,
+                        child: const Text(
+                          'Sign up now.',
                           style: TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 3.0,
-                            color: AppTheme.mutedForeground,
+                            color: AppTheme.foreground,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: AppTheme.borderLight,
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 32),
-
-                  // ── Google Sign In Button ────────────────────────
-                  SizedBox(
-                    height: 56,
-                    child: OutlinedButton(
-                      onPressed:
-                          _isGoogleLoading ? null : _handleGoogleSignIn,
-                      child: _isGoogleLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 1.5,
-                                color: AppTheme.foreground,
-                              ),
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Simple G letter as Google icon (monochrome)
-                                Container(
-                                  width: 22,
-                                  height: 22,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: AppTheme.foreground,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  child: const Center(
-                                    child: Text(
-                                      'G',
-                                      style: TextStyle(
-                                        fontFamily: AppTheme.fontDisplay,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppTheme.foreground,
-                                        height: 1.2,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 14),
-                                const Text('SIGN IN WITH GOOGLE'),
-                              ],
-                            ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 48),
-
-                  // ── Register Link ───────────────────────────────
-                  Center(
-                    child: GestureDetector(
-                      onTap: _navigateToRegister,
-                      child: RichText(
-                        text: TextSpan(
-                          style: TextStyle(
-                            fontFamily: AppTheme.fontBody,
-                            fontSize: 14,
-                            color: AppTheme.mutedForeground,
-                            height: 1.5,
-                          ),
-                          children: const [
-                            TextSpan(text: "Don't have an account?  "),
-                            TextSpan(
-                              text: 'REGISTER',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 2.0,
-                                color: AppTheme.foreground,
-                                decoration: TextDecoration.underline,
-                                decorationThickness: 2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: isSmall ? 32 : 64),
                 ],
               ),
             ),
